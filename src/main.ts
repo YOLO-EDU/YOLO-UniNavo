@@ -356,15 +356,19 @@ function bind() {
     });
   }
   document
-    .querySelectorAll<HTMLButtonElement>("[data-scenario-choice]")
+    .querySelectorAll<HTMLButtonElement>(
+      "[data-scenario-choice], [data-scenario-pick]",
+    )
     .forEach((button) =>
       button.addEventListener("click", () => {
-        matrixCell = button.dataset.scenarioChoice!;
+        const attr = button.dataset.scenarioPick
+          ? "data-scenario-pick"
+          : "data-scenario-choice";
+        matrixCell =
+          button.dataset.scenarioPick ?? button.dataset.scenarioChoice!;
         render();
         document
-          .querySelector<HTMLButtonElement>(
-            `[data-scenario-choice="${matrixCell}"]`,
-          )
+          .querySelector<HTMLButtonElement>(`[${attr}="${matrixCell}"]`)
           ?.focus({ preventScroll: true });
       }),
     );

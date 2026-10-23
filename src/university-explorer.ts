@@ -9,7 +9,13 @@ import {
   confirmed2028Policies,
 } from "./university-review.ts";
 import { getLanguage, translate } from "./i18n.ts";
-import { satOutlook, satPosition, type SatPosition } from "./matching.ts";
+import {
+  listDiff,
+  satOutlook,
+  satPosition,
+  selectivity,
+  type SatPosition,
+} from "./matching.ts";
 import { dayLabel, positionLabels } from "./home-page.ts";
 import {
   browseSchools,
@@ -263,6 +269,19 @@ const shortNames: Record<string, [string, string]> = {
   "southern-california": ["USC", "서던캘리포니아 (USC)"],
   "maryland-college-park": ["Maryland–College Park", "메릴랜드 칼리지파크"],
 };
+// Five shades from the least to the most selective combination.
+const heatLevel = (v: number | null) =>
+  v === null
+    ? 0
+    : v < 1250
+      ? 1
+      : v < 1300
+        ? 2
+        : v < 1350
+          ? 3
+          : v < 1450
+            ? 4
+            : 5;
 function matrix(input: ScenarioInput, ctx: ExplorerContext) {
   const rows = candidateMatrix();
   const mineBand = ctx.mine?.band ?? "";
@@ -273,46 +292,85 @@ function matrix(input: ScenarioInput, ctx: ExplorerContext) {
       : SAT_SCENARIOS.filter((n) => n <= score).at(-1);
   const mineRef = refFor(mineSat);
   const targetRef = refFor(ctx.target);
-  const [selBand, selSat] = (
-    ctx.matrixCell ?? `${input.band}|${candidatePlan(input).referenceSat ?? ""}`
-  ).split("|");
-  const selected = rows.find(
-    (r) => r.band === selBand && String(r.sat) === selSat,
-  );
-  const cellName = (s: ScenarioSchool) =>
-    `<span title="${esc(name(s))}">${esc(shortName(s))}</span>`;
-  const grid = `<div class="matrix-grid">${"<span></span>"}${SAT_SCENARIOS.map((n) => `<span class="matrix-col">SAT ${n}${n === mineRef ? ` · ${w("me", "나")}` : n === targetRef ? ` · ${w("target", "목표")}` : ""}</span>`).join("")}${VISIBLE_GRADE_BANDS.map(
+  const fallback = `${VISIBLE_GRADE_BANDS.includes(input.band as (typeof VISIBLE_GRADE_BANDS)[number]) ? input.band : VISIBLE_GRADE_BANDS[0]}|${candidatePlan(input).referenceSat ?? SAT_SCENARIOS[0]}`;
+  const [selBand, selSatText] = (ctx.matrixCell ?? fallback).split("|");
+  const selSat = Number(selSatText);
+  const find = (band: string, sat: number) =>
+    rows.find((r) => r.band === band && r.sat === sat);
+  const selected = find(selBand, selSat) ?? rows[0];
+  const chip = (attr: string, on: boolean, label: string, extra = "") =>
+    `<button class="combo-chip ${on ? "is-on" : ""} ${extra}" ${attr} aria-pressed="${on}">${label}</button>`;
+  const bandChips = VISIBLE_GRADE_BANDS.map((b) =>
+    chip(
+      `data-scenario-pick="${b}|${selected.sat}"`,
+      b === selected.band,
+      `${b}${b === mineBand ? ` <small>· ${w("me", "나")}</small>` : ""}`,
+    ),
+  ).join("");
+  const satChips = SAT_SCENARIOS.map((n) =>
+    chip(
+      `data-scenario-pick="${selected.band}|${n}"`,
+      n === selected.sat,
+      `${n}${n === mineRef ? ` <small>· ${w("me", "나")}</small>` : n === targetRef ? ` <small>· ${w("target", "목표")}</small>` : ""}`,
+      n === targetRef && n !== selected.sat ? "is-target" : "",
+    ),
+  ).join("");
+  const map = `<div class="combo-map" aria-label="${w("All 25 combinations", "25개 조합 한눈에")}"><span></span>${SAT_SCENARIOS.map((n) => `<span class="map-col">${String(n).slice(0, 2)}</span>`).join("")}${VISIBLE_GRADE_BANDS.map(
     (b) =>
-      `<span class="matrix-row ${b === mineBand ? "is-mine" : ""}">${b}${b === mineBand ? ` · ${w("me", "나")}` : ""}</span>${SAT_SCENARIOS.map(
-        (sat) => {
-          const cell = rows.find((r) => r.band === b && r.sat === sat)!;
-          const isSel = b === selBand && String(sat) === selSat;
-          const cls = [
-            "matrix-cell",
-            isSel ? "is-selected" : "",
-            b === mineBand ? "is-mine-row" : "",
-            b === mineBand && sat === targetRef && !isSel ? "is-target" : "",
-          ]
-            .filter(Boolean)
-            .join(" ");
-          return `<button class="${cls}" data-scenario-choice="${b}|${sat}" aria-pressed="${isSel}" aria-label="${esc(b)} SAT ${sat} ${w("view 10 candidates", "후보 10곳 보기")}">${cell.selected
-            .slice(0, 2)
-            .map(cellName)
-            .join("")}<small>+${cell.selected.length - 2}</small></button>`;
+      `<span class="map-row ${b === mineBand ? "is-mine" : ""}">${b.slice(0, 2)}</span>${SAT_SCENARIOS.map(
+        (n) => {
+          const cell = find(b, n)!;
+          const level = heatLevel(selectivity(cell.selected));
+          const isSel = b === selected.band && n === selected.sat;
+          return `<button class="map-cell heat-${level} ${isSel ? "is-selected" : ""} ${b === mineBand && n === targetRef && !isSel ? "is-target" : ""}" data-scenario-choice="${b}|${n}" aria-pressed="${isSel}" aria-label="${esc(b)} SAT ${n} ${w("view 10 candidates", "후보 10곳 보기")}"></button>`;
         },
       ).join("")}`,
-  ).join("")}</div>`;
-  const panel = selected
-    ? `<aside class="matrix-panel panel" aria-labelledby="cell-title"><span class="small muted">${esc(selected.band)} · SAT ${selected.sat}</span><h2 id="cell-title">${w("10 schools to investigate", "검토 후보 10곳")}</h2>${selected.selected
-        .map(
-          (s) =>
-            `<div class="date-row"><button class="link-button" data-detail="${s.id}">${esc(name(s))}</button>${mineSat !== null ? positionChipOnly(s, mineSat) : `<span class="small muted">${s.satRange ? `SAT ${s.satRange.low}–${s.satRange.high}` : "—"}</span>`}</div>`,
-        )
-        .join(
-          "",
-        )}<button class="button matrix-open" data-open-cell="${esc(selected.band)}|${selected.sat}">${w("Open this combination", "이 조합으로 자세히 보기")}</button></aside>`
-    : "";
-  return `<div class="matrix-layout"><section class="panel">${grid}<div class="matrix-legend small muted"><span><i class="lg-sel"></i>${w("Selected", "지금 보는 칸")}</span><span><i class="lg-target"></i>${w("Target SAT", "목표 SAT")}</span><span><i class="lg-mine"></i>${w("My grade row", "내 내신 줄")}</span></div></section>${panel}</div><details class="methodology matrix-method"><summary>${w("How this table was made", "이 표는 어떻게 만들었나요")}</summary>${disclosure()}<p>${w("Each row is lower-inclusive and upper-exclusive, except100% is included in the last row. Some low-grade rows repeat at higher SAT scores because academic requirements remain.", "내신 구간의 시작점은 포함, 끝점은 다음 구간에 포함하며 100%는 마지막 구간입니다. 낮은 내신 구간은 SAT가 올라도 학업 요건이 남아 일부 목록이 같습니다.")}</p><button class="text-button" id="export-scenarios">${w("Download all 250 candidate entries ↓", "전체 250개 후보 항목 내려받기 ↓")}</button></details>`;
+  ).join(
+    "",
+  )}</div><div class="map-legend"><span>${w("Less selective", "덜 선발적")}</span><i></i><span>${w("More selective", "더 선발적")}</span></div>`;
+  const nextSat = SAT_SCENARIOS.find((n) => n > selected.sat);
+  const bandIndex = VISIBLE_GRADE_BANDS.indexOf(
+    selected.band as (typeof VISIBLE_GRADE_BANDS)[number],
+  );
+  const nextBand = VISIBLE_GRADE_BANDS[bandIndex + 1];
+  const names = (list: ScenarioSchool[]) =>
+    list.length
+      ? `${list
+          .slice(0, 3)
+          .map((s) => esc(shortName(s)))
+          .join(
+            ", ",
+          )}${list.length > 3 ? w(` +${list.length - 3}`, ` 외 ${list.length - 3}곳`) : ""}`
+      : "";
+  const diffCard = (
+    title: string,
+    target: { selected: ScenarioSchool[] } | undefined,
+    cls: string,
+  ) => {
+    if (!target) return "";
+    const d = listDiff(selected.selected, target.selected);
+    return `<div class="diff-card ${cls}"><span class="small strong-green">${title}</span>${
+      d.added.length || d.removed.length
+        ? `${d.added.length ? `<span class="diff-add">+ ${names(d.added)}</span>` : ""}${d.removed.length ? `<span class="diff-remove">− ${names(d.removed)}</span>` : ""}`
+        : `<span class="muted">${w("Same ten schools", "같은 10곳이에요")}</span>`
+    }</div>`;
+  };
+  const diffs = `<section class="combo-diffs" aria-label="${w("What changes", "바꾸면 달라지는 대학")}">${nextSat ? diffCard(w(`If the SAT reaches ${nextSat}`, `SAT ${nextSat}으로 올리면`), find(selected.band, nextSat), "is-sat") : ""}${nextBand ? diffCard(w(`If marks reach ${nextBand}`, `내신 ${nextBand}가 되면`), find(nextBand, selected.sat), "") : ""}</section>`;
+  const list = selected.selected
+    .map((s) => {
+      const q = qsRanks[s.id];
+      return `<div class="combo-row"><span><button class="link-button" data-detail="${s.id}">${esc(name(s))}</button> <small class="muted">${esc(s.state)}${q ? ` · QS ${q.tied ? "=" : ""}${q.rank}` : ""}</small></span>${
+        s.satRange ? satBar(s, mineSat) : `<span class="small muted">—</span>`
+      }${mineSat !== null ? positionChipOnly(s, mineSat) : `<span class="small muted">${s.satRange ? `${s.satRange.low}–${s.satRange.high}` : "—"}</span>`}</div>`;
+    })
+    .join("");
+  const backToMine =
+    ctx.mine?.band &&
+    mineRef !== undefined &&
+    (selected.band !== mineBand || selected.sat !== mineRef)
+      ? `<button class="button button-light" data-scenario-pick="${esc(mineBand)}|${mineRef}">${w("Back to my grades", "내 성적으로 돌아가기")}</button>`
+      : "";
+  return `<section class="panel combo-pick" aria-label="${w("Choose a combination", "조합 고르기")}"><div class="combo-controls"><div><span class="small muted strong">${w("School average", "내신")}</span><div class="combo-chips" role="group" aria-label="${w("Grade band", "내신 구간")}">${bandChips}</div></div><div><span class="small muted strong">SAT</span><div class="combo-chips" role="group" aria-label="SAT">${satChips}</div></div></div><div class="combo-map-wrap">${map}</div></section>${diffs}<section class="panel combo-list" aria-labelledby="combo-title"><div class="panel-head"><h2 id="combo-title">${esc(selected.band)} · SAT ${selected.sat} · ${w("10 schools to investigate", "검토 후보 10곳")}</h2><span class="small muted">${mineSat !== null ? w(`QS order · bar 1000–1600, line = ${mineSat}`, `QS 순 · 막대는 SAT 1000–1600, 선은 태율이 ${mineSat}`) : w("QS order", "QS 순")}</span></div><div class="combo-rows">${list}</div><div class="combo-actions"><button class="button" data-open-cell="${esc(selected.band)}|${selected.sat}">${w("Use this combination", "이 조합을 내 후보로 보기")}</button>${backToMine}</div></section><details class="methodology matrix-method"><summary>${w("How this was made", "이 조합은 어떻게 만들었나요")}</summary>${disclosure()}<p>${w("Each row is lower-inclusive and upper-exclusive, except100% is included in the last row. Shading is the average middle of the published SAT ranges in each list; it is not an admission probability.", "내신 구간의 시작점은 포함, 끝점은 다음 구간에 포함하며 100%는 마지막 구간입니다. 색은 각 목록 대학들의 공개 SAT 중간값 평균이며 합격 가능성이 아닙니다.")}</p><button class="text-button" id="export-scenarios">${w("Download all 250 candidate entries ↓", "전체 250개 후보 항목 내려받기 ↓")}</button></details>`;
 }
 function eliteScoreTable(input: ScenarioInput) {
   const score = input.sat ?? 1500;
@@ -404,7 +462,7 @@ export function renderExplorer(
     [
       ["scenario", w("My shortlist", "내 후보 10곳")],
       ["browse", w("Browse", "둘러보기")],
-      ["all-scenarios", w("Grade × SAT table", "성적 조합표")],
+      ["all-scenarios", w("Grade × SAT", "성적 조합")],
       [
         "compare",
         w(`Saved · compare ${saved.size}`, `저장·비교 ${saved.size}`),

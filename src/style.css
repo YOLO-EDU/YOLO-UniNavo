@@ -6631,3 +6631,173 @@ dialog.drawer:not([open]) {
   border-radius: 10px;
   background: #f8f9f6;
 }
+/* Grade x SAT combinations v2 */
+.combo-pick {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 240px;
+  gap: 24px;
+  align-items: center;
+}
+.combo-controls {
+  display: grid;
+  gap: 16px;
+}
+.combo-controls .strong {
+  font-weight: 600;
+}
+.combo-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 6px;
+}
+.combo-chip {
+  min-height: 42px;
+  padding: 0 16px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: white;
+  color: var(--ink);
+  font-size: 15px;
+}
+.combo-chip small {
+  opacity: 0.8;
+}
+.combo-chip.is-on {
+  border: 2px solid #183f45;
+  background: #183f45;
+  color: white;
+  font-weight: 600;
+}
+.combo-chip.is-target {
+  border: 2px dashed var(--green);
+  background: var(--soft);
+}
+.combo-map {
+  display: grid;
+  grid-template-columns: 26px repeat(5, minmax(0, 1fr));
+  gap: 3px;
+  font-size: 10px;
+  color: var(--muted);
+  text-align: center;
+}
+.map-row {
+  padding-right: 4px;
+  text-align: right;
+  align-self: center;
+}
+.map-row.is-mine {
+  color: #183f45;
+  font-weight: 700;
+}
+.map-cell {
+  height: 26px;
+  padding: 0;
+  border: 0;
+  border-radius: 5px;
+  cursor: pointer;
+}
+.map-cell.heat-0,
+.map-cell.heat-1 {
+  background: #e8efe8;
+}
+.map-cell.heat-2 {
+  background: #c9d9cb;
+}
+.map-cell.heat-3 {
+  background: #a1b6a0;
+}
+.map-cell.heat-4 {
+  background: #5f8a78;
+}
+.map-cell.heat-5 {
+  background: #183f45;
+}
+.map-cell.is-selected {
+  outline: 3px solid #e3a77c;
+  outline-offset: 1px;
+}
+.map-cell.is-target {
+  outline: 2px dashed var(--green);
+  outline-offset: 1px;
+}
+.map-legend {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+  font-size: 11px;
+  color: var(--muted);
+}
+.map-legend i {
+  flex: 1;
+  height: 6px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #e8efe8, #a1b6a0, #183f45);
+}
+.combo-diffs {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 14px;
+  margin-bottom: 20px;
+}
+.diff-card {
+  display: grid;
+  gap: 2px;
+  padding: 14px 18px;
+  border-radius: 12px;
+  background: #f3f4f1;
+  font-size: 14px;
+}
+.diff-card.is-sat {
+  background: var(--soft);
+}
+.diff-add {
+  color: #2c6a3f;
+  font-weight: 600;
+}
+.diff-remove {
+  color: var(--muted);
+}
+.combo-list .panel-head h2 {
+  margin: 0;
+}
+.combo-rows {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: 28px;
+  margin-top: 10px;
+}
+.combo-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 110px 80px;
+  gap: 12px;
+  align-items: center;
+  padding: 11px 0;
+  border-top: 1px solid #edf2ed;
+  font-size: 14px;
+}
+.combo-row .sat-bar {
+  margin: 0;
+  height: 8px;
+}
+.combo-row .pos-chip {
+  justify-self: end;
+}
+.combo-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 14px;
+}
+@media (max-width: 1000px) {
+  .combo-pick {
+    grid-template-columns: 1fr;
+  }
+  .combo-map-wrap {
+    max-width: 280px;
+  }
+  .combo-rows {
+    grid-template-columns: 1fr;
+  }
+}

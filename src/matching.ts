@@ -64,3 +64,23 @@ export function satOutlook(list: ScenarioSchool[], sat: number): SatStep[] {
     },
   ];
 }
+
+// How selective a list is: the average middle of its published SAT ranges.
+// Schools without a range, or that do not consider the SAT, are left out.
+export function selectivity(list: ScenarioSchool[]): number | null {
+  const mids = list
+    .filter((s) => s.satRange && s.testing.policy !== "not-considered")
+    .map((s) => (s.satRange!.low + s.satRange!.high) / 2);
+  return mids.length
+    ? Math.round(mids.reduce((a, b) => a + b, 0) / mids.length)
+    : null;
+}
+
+export function listDiff(from: ScenarioSchool[], to: ScenarioSchool[]) {
+  const before = new Set(from.map((s) => s.id));
+  const after = new Set(to.map((s) => s.id));
+  return {
+    added: to.filter((s) => !before.has(s.id)),
+    removed: from.filter((s) => !after.has(s.id)),
+  };
+}
