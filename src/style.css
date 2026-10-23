@@ -6175,3 +6175,459 @@ dialog.drawer:not([open]) {
 .period-chips .icon-button {
   flex: 0 0 auto;
 }
+/* Home v2 */
+.home-head.v2 {
+  display: block;
+  margin-bottom: 18px;
+}
+.home-head.v2 .home-title {
+  font-size: 36px;
+}
+.home-summary {
+  margin: 6px 0 0;
+  font-size: 16px;
+  color: #4a5d61;
+}
+.home-glance {
+  display: grid;
+  grid-template-columns: 1.3fr 1fr 1fr;
+  gap: 14px;
+  margin-bottom: 20px;
+}
+.home-glance .panel {
+  margin: 0;
+}
+.glance-deadline {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 18px 20px;
+  border-radius: 12px;
+  background: #fbeee4;
+  color: #8a4213;
+}
+.glance-deadline > span:last-child {
+  display: grid;
+}
+.glance-deadline strong {
+  color: var(--ink);
+  font-size: 17px;
+}
+.dday-badge {
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  width: 74px;
+  height: 74px;
+  border-radius: 16px;
+  background: white;
+  text-align: center;
+  line-height: 1.1;
+}
+.dday-badge small {
+  font-size: 12px;
+  font-weight: 600;
+}
+.dday-badge strong {
+  font-size: 22px;
+  color: #8a4213 !important;
+}
+.glance-progress {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.glance-progress > span:last-child {
+  display: grid;
+}
+.ring {
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  border-radius: 999px;
+  background: conic-gradient(
+    var(--green) 0 var(--pct),
+    var(--soft) var(--pct) 100%
+  );
+}
+.ring > span {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 999px;
+  background: white;
+  font-weight: 700;
+}
+.glance-sat {
+  display: grid;
+  align-content: start;
+  gap: 4px;
+}
+.glance-row {
+  display: flex;
+  justify-content: space-between;
+}
+.task-tags {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 4px;
+}
+.task-tag {
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--soft);
+  color: var(--green);
+  font-size: 12px;
+  font-weight: 600;
+}
+.task-tag.is-due,
+.task-tag.is-warn {
+  background: #fbeee4;
+  color: #8a4213;
+}
+.done-fold {
+  padding-top: 10px;
+}
+.done-fold > summary {
+  cursor: pointer;
+  font-size: 14px;
+  color: var(--muted);
+}
+.quick-task {
+  display: flex;
+  margin-top: 14px;
+}
+.quick-task label {
+  flex: 1;
+  display: flex;
+}
+.quick-task input {
+  flex: 1;
+  min-height: 44px;
+  padding: 0 12px;
+  border: 1px dashed #bac8ba;
+  border-radius: 8px;
+  background: #f8f9f6;
+  font: inherit;
+  color: var(--ink);
+}
+.memo-card {
+  padding: 18px 20px;
+  margin-bottom: 20px;
+  border-radius: 12px;
+  background: var(--soft);
+}
+.memo-card h2 {
+  margin: 0;
+  font-family: inherit;
+  font-size: 15px;
+  color: var(--green);
+}
+.memo-card p {
+  margin: 6px 0 4px;
+}
+.uni-stack {
+  display: flex;
+  height: 10px;
+  margin-top: 6px;
+  border-radius: 999px;
+  overflow: hidden;
+  background: var(--line);
+}
+.uni-stack .s-within,
+.uni-legend .s-within {
+  background: var(--green);
+}
+.uni-stack .s-below,
+.uni-legend .s-below {
+  background: #e3a77c;
+}
+.uni-stack .s-rest,
+.uni-legend .s-rest {
+  background: #cfd8d2;
+}
+.uni-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+  margin: 8px 0 6px;
+  color: #4a5d61;
+}
+.uni-legend i {
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  margin-right: 5px;
+  border-radius: 999px;
+}
+.ahead-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  margin-top: 10px;
+}
+.ahead-card {
+  display: grid;
+  align-content: start;
+  gap: 2px;
+  padding: 14px 16px;
+  border-radius: 10px;
+  background: #f8f9f6;
+  border-top: 3px solid var(--line);
+}
+.ahead-card.ahead-0 {
+  border-top-color: var(--green);
+}
+.ahead-card.ahead-1 {
+  border-top-color: var(--accent);
+}
+.ahead-tasks {
+  display: grid;
+  gap: 2px;
+  margin-top: 6px;
+  color: #4a5d61;
+}
+@media (max-width: 1000px) {
+  .home-glance,
+  .ahead-grid {
+    grid-template-columns: 1fr;
+  }
+}
+/* Grades v2 */
+.grades-head {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+.grades-head .home-title {
+  font-size: 36px;
+  margin: 0;
+}
+.grades-head .segmented {
+  margin: 0;
+}
+.grades-summary {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+  margin-bottom: 20px;
+}
+.grades-summary > div {
+  display: grid;
+  align-content: start;
+  gap: 2px;
+  padding: 16px 18px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: white;
+}
+.grades-summary strong {
+  font-size: 30px;
+  line-height: 1.2;
+}
+.grades-summary strong small {
+  font-size: 16px;
+  font-weight: 500;
+}
+.grades-summary .is-dark {
+  border-color: #183f45;
+  background: #183f45;
+  color: white;
+}
+.grades-summary .is-dark .small {
+  color: #d6e3dc;
+}
+.marks-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 2fr) 64px 70px 44px;
+  gap: 0 14px;
+  align-items: center;
+  font-size: 14px;
+}
+.marks-grid > * {
+  padding: 10px 0;
+  border-top: 1px solid #edf2ed;
+}
+.marks-grid .th {
+  border-top: 0;
+  padding: 6px 0;
+  font-size: 12px;
+  color: var(--muted);
+}
+.marks-grid .scale {
+  display: flex;
+  justify-content: space-between;
+}
+.marks-grid .num {
+  text-align: right;
+}
+.mark-name {
+  display: grid;
+}
+.mark-name strong {
+  font-size: 15px;
+}
+.mark-name .grade-tag {
+  justify-self: start;
+  margin: 2px 0 0;
+}
+.mark-bar {
+  position: relative;
+  display: block;
+  height: 10px;
+  padding: 0;
+  margin: 10px 0;
+  border: 0;
+  border-radius: 999px;
+  background: var(--soft);
+}
+.mark-bar i {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  border-radius: 999px;
+  background: var(--green);
+}
+.mark-bar i.is-other {
+  background: var(--accent);
+}
+.mark-bar i.is-low {
+  background: #e3a77c;
+}
+.mark-score {
+  font-size: 16px;
+  font-weight: 700;
+}
+.mark-edit {
+  width: 36px;
+  height: 36px;
+  border: 0;
+  border-top: 1px solid #edf2ed;
+  border-radius: 0;
+  background: none;
+  color: var(--muted);
+  font-size: 16px;
+}
+.grades-two {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+  align-items: start;
+}
+.sat-row {
+  display: grid;
+  grid-template-columns: auto 1fr auto auto;
+  gap: 12px;
+  align-items: center;
+  padding: 10px 0;
+  border-top: 1px solid #edf2ed;
+  font-size: 14px;
+}
+.target-line {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 14px;
+  font-size: 14px;
+  color: #4a5d61;
+}
+.target-line input {
+  width: 96px;
+  min-height: 36px;
+  margin-left: 6px;
+  padding: 0 10px;
+  border: 1px solid #bac8ba;
+  border-radius: 8px;
+  font: inherit;
+}
+.ap-plan.v2 {
+  display: grid;
+  gap: 2px;
+  margin-bottom: 10px;
+}
+.ap-plan-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.ap-steps {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 4px;
+  margin-top: 10px;
+}
+.ap-steps button {
+  min-height: 34px;
+  border: 0;
+  border-radius: 6px;
+  background: var(--soft);
+  color: var(--muted);
+  font-size: 12px;
+}
+.ap-steps button.is-done {
+  background: var(--green);
+  color: white;
+}
+.ap-steps button.is-now {
+  background: #8a4213;
+  color: white;
+  font-weight: 600;
+}
+.text-button.danger {
+  color: #a3361f;
+  margin-right: auto;
+}
+@media (max-width: 1000px) {
+  .grades-summary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .grades-two {
+    grid-template-columns: 1fr;
+  }
+}
+.marks-grid {
+  display: block;
+}
+.mark-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 2fr) 64px 70px 44px;
+  gap: 0 14px;
+  align-items: center;
+  padding: 10px 0;
+  border-top: 1px solid #edf2ed;
+}
+.mark-row.is-head {
+  padding: 4px 0;
+  border-top: 0;
+}
+.marks-grid .mark-row > * {
+  padding: 0;
+  border: 0;
+}
+.marks-grid .mark-bar {
+  margin: 0;
+}
+.mark-edit {
+  border: 0;
+  border-radius: 8px;
+}
+.mark-edit:hover {
+  background: var(--soft);
+}
+.ap-card {
+  display: grid;
+  gap: 2px;
+  padding: 14px 16px;
+  margin-bottom: 10px;
+  border-radius: 10px;
+  background: #f8f9f6;
+}

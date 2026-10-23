@@ -139,6 +139,18 @@ export function scoreAt(
     .at(-1);
   return past ? past.value : null;
 }
+// Difference between a course's current mark and its previous record.
+export function lastChange(s: GradesState, courseId: string): number | null {
+  const c = s.courses.find((x) => x.id === courseId);
+  const now = c ? courseScore(c) : null;
+  const prev = s.history
+    .filter((h) => h.courseId === courseId)
+    .sort((a, b) => a.date.localeCompare(b.date))
+    .at(-1);
+  return now === null || !prev
+    ? null
+    : Math.round((now - prev.value) * 10) / 10;
+}
 export function courseChanges(
   s: GradesState,
   range: { start: string; end: string },

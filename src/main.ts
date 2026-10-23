@@ -579,6 +579,28 @@ function bind() {
       render();
     }),
   );
+  document
+    .querySelector<HTMLFormElement>("#quick-task")
+    ?.addEventListener("submit", (event) => {
+      event.preventDefault();
+      const field = (event.currentTarget as HTMLFormElement).elements.namedItem(
+        "title",
+      ) as HTMLInputElement;
+      const title = field.value.trim();
+      if (!title) return;
+      rememberPlan();
+      planner = saveTaskEdit(planner, {
+        id: `custom-${crypto.randomUUID()}`,
+        monthId: currentMonthId(),
+        title,
+        detail: "",
+      });
+      persistenceAvailable =
+        writeLocal("planner", planner) && persistenceAvailable;
+      render();
+      document.querySelector<HTMLInputElement>("#quick-task input")?.focus();
+      announce(words("Task added.", "할 일을 추가했어요."));
+    });
   if (examTabs.includes(route()))
     bindTestPrep({
       ui: prepUi,
