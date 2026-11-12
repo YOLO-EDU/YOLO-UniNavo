@@ -71,6 +71,7 @@ main small:not(strong small):not(.grades-summary small) {
   font-size: var(--fs-xs) !important;
 }
 main .grades-summary > div > strong,
+main .grade-stat-variants > div > strong,
 main strong.stat {
   font-size: var(--fs-stat) !important;
   line-height: 1.1;
@@ -282,6 +283,7 @@ main .report-stats > .panel {
   margin: 0;
 }
 main .grades-summary > div > strong,
+main .grade-stat-variants > div > strong,
 main .report-stats strong.stat {
   line-height: 1.05;
   letter-spacing: -0.01em;
@@ -869,4 +871,47 @@ main .ap-pick .button {
 }
 .workspace > main {
   flex: 1 0 auto;
+}
+
+/* Let every grade contribute to sizing while only the selected one is visible. */
+.grades-head .segmented {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  max-width: 100%;
+}
+.grades-head .segmented button {
+  justify-content: center;
+}
+.grade-variants {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+}
+.grade-variants > div {
+  grid-area: 1 / 1;
+}
+.grade-variants > [inert] {
+  visibility: hidden;
+}
+.grade-stat-variants > div {
+  display: grid;
+  align-content: start;
+  gap: 4px;
+}
+.grade-variants .mark-name {
+  overflow-wrap: anywhere;
+}
+@media (max-width: 600px) {
+  .grade-variants .mark-row {
+    grid-template-columns: minmax(0, 1fr) 40px 42px 36px;
+    gap: 4px 8px;
+  }
+  .grade-variants .mark-row .scale {
+    display: none;
+  }
+  .grade-variants .mark-bar {
+    grid-area: 2 / 1 / 3 / -1;
+  }
+  .grade-variants .grade-tag {
+    white-space: normal;
+  }
 }

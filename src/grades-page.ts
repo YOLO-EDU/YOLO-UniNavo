@@ -130,23 +130,63 @@ function apCard(state: GradesState) {
   }<details class="inline-form"><summary class="button button-light">＋ ${w("Add an AP subject", "AP 과목 추가")}</summary><form id="ap-form" class="ap-add"><label>${w("AP subject", "AP 과목")}<input name="course" required maxlength="80" placeholder="${w("e.g. AP Statistics", "예: AP Statistics")}"></label><label>${w("How", "방식")}<select name="mode"><option value="exam-only">${w("Exam only", "시험만 응시")}</option><option value="course">${w("Course and exam", "수업과 시험")}</option></select></label><div class="form-actions"><button type="button" class="text-button" data-close-form>${w("Cancel", "취소")}</button><button class="button" type="submit">${w("Add", "추가")}</button></div></form></details></section>`;
 }
 
-export function renderGradesPage(state: GradesState, ui: GradesUi) {
-  const courses = state.courses.filter((c) => c.grade === ui.grade);
+const gradeLevels = [9, 10, 11, 12];
+
+// The hidden variants take up space in the same grid cell. The tallest grade
+// sets the size without exposing inactive content to focus or screen readers.
+function gradeVariants(contents: string[], selected: number, className = "") {
+  return `<div class="grade-variants ${className}">${contents
+    .map(
+      (content, i) =>
+        `<div${gradeLevels[i] === selected ? "" : " inert"}>${content}</div>`,
+    )
+    .join("")}</div>`;
+}
+
+function gradeStats(courses: CourseGrade[], totalGpa: number | null) {
   const average = simpleAverage(courses),
     core = coreAverage(courses),
     band = gradeBand(average),
-    gpa = usGpa(courses),
-    totalGpa = usGpa(state.courses);
-  const best = bestSat(state.sat);
+    gpa = usGpa(courses);
   const coreNames = courses
     .filter((c) => c.tag === "required" || c.tag === "major")
     .map((c) => c.name);
+  return [
+    `<span class="small">${w("School average", "내신 평균")}</span><strong>${average ?? "—"}${average !== null ? "<small>%</small>" : ""}</strong><span class="small">${average !== null ? `${band ? `${band} ${w("band", "구간")} · ` : ""}${w(`${courses.length} courses`, `${courses.length}과목`)}` : w("Add marks to see it", "점수를 넣으면 나와요")}</span>`,
+    `<span class="small muted">${w("U.S. GPA (reference)", "미국식 GPA (참고)")}</span><strong>${gpa !== null ? gpa.toFixed(2) : "—"}${gpa !== null ? "<small> / 4.0</small>" : ""}</strong><span class="small muted">${totalGpa !== null && totalGpa !== gpa ? `${w(`All grades ${totalGpa.toFixed(2)}`, `전 학년 누적 ${totalGpa.toFixed(2)}`)} · ` : ""}<a href="${GPA_SOURCE_URL}" target="_blank" rel="noopener noreferrer" title="${w("Each course on its own: 90–100 4.0, 85–89 3.9, 80–84 3.7, 77–79 3.3, 73–76 3.0, 70–72 2.7, 67–69 2.3, 63–66 2.0, 60–62 1.7, 57–59 1.3, 53–56 1.0, 50–52 0.7, weighted by credit. Steps from the OMSAS 4.0 table published by OUAC (made for Ontario university marks). A reference only: U.S. colleges read the Ontario percentages.", "과목마다 따로 환산: 90–100 4.0, 85–89 3.9, 80–84 3.7, 77–79 3.3, 73–76 3.0, 70–72 2.7, 67–69 2.3, 63–66 2.0, 60–62 1.7, 57–59 1.3, 53–56 1.0, 50–52 0.7 → 학점 가중 평균. OUAC가 공개한 OMSAS 4.0 환산표(+/−)를 따른 참고값이에요. 원래 대학 성적용 표이고, 미국 대학은 지원서의 퍼센트를 직접 봐요.")}">${w("Basis ↗", "기준 ↗")}</a></span>`,
+    `<span class="small muted">${w("Required & major", "필수·전공 관련")}</span><strong>${core ?? "—"}${core !== null ? "<small>%</small>" : ""}</strong><span class="small muted" title="${esc(coreNames.join(" · "))}">${coreNames.length ? w(`${coreNames.length} of ${courses.length} courses`, `${courses.length}과목 중 ${coreNames.length}과목`) : ""}</span>`,
+  ];
+}
+
+export function renderGradesPage(state: GradesState, ui: GradesUi) {
+  const byGrade = gradeLevels.map((grade) =>
+    state.courses.filter((course) => course.grade === grade),
+  );
+  const totalGpa = usGpa(state.courses);
+  const stats = byGrade.map((courses) => gradeStats(courses, totalGpa));
+  const best = bestSat(state.sat);
   const nextAp = state.ap[0];
-  const summary = `<section class="grades-summary" aria-label="${w("Summary", "요약")}"><div class="is-dark"><span class="small">${w("School average", "내신 평균")}</span><strong>${average ?? "—"}${average !== null ? "<small>%</small>" : ""}</strong><span class="small">${average !== null ? `${band ? `${band} ${w("band", "구간")} · ` : ""}${w(`${courses.length} courses`, `${courses.length}과목`)}` : w("Add marks to see it", "점수를 넣으면 나와요")}</span></div><div><span class="small muted">${w("U.S. GPA (reference)", "미국식 GPA (참고)")}</span><strong>${gpa !== null ? gpa.toFixed(2) : "—"}${gpa !== null ? "<small> / 4.0</small>" : ""}</strong><span class="small muted">${totalGpa !== null && totalGpa !== gpa ? `${w(`All grades ${totalGpa.toFixed(2)}`, `전 학년 누적 ${totalGpa.toFixed(2)}`)} · ` : ""}<a href="${GPA_SOURCE_URL}" target="_blank" rel="noopener noreferrer" title="${w("Each course on its own: 90–100 4.0, 85–89 3.9, 80–84 3.7, 77–79 3.3, 73–76 3.0, 70–72 2.7, 67–69 2.3, 63–66 2.0, 60–62 1.7, 57–59 1.3, 53–56 1.0, 50–52 0.7, weighted by credit. Steps from the OMSAS 4.0 table published by OUAC (made for Ontario university marks). A reference only: U.S. colleges read the Ontario percentages.", "과목마다 따로 환산: 90–100 4.0, 85–89 3.9, 80–84 3.7, 77–79 3.3, 73–76 3.0, 70–72 2.7, 67–69 2.3, 63–66 2.0, 60–62 1.7, 57–59 1.3, 53–56 1.0, 50–52 0.7 → 학점 가중 평균. OUAC가 공개한 OMSAS 4.0 환산표(+/−)를 따른 참고값이에요. 원래 대학 성적용 표이고, 미국 대학은 지원서의 퍼센트를 직접 봐요.")}">${w("Basis ↗", "기준 ↗")}</a></span></div><div><span class="small muted">${w("Required & major", "필수·전공 관련")}</span><strong>${core ?? "—"}${core !== null ? "<small>%</small>" : ""}</strong><span class="small muted" title="${esc(coreNames.join(" · "))}">${coreNames.length ? w(`${coreNames.length} of ${courses.length} courses`, `${courses.length}과목 중 ${coreNames.length}과목`) : ""}</span></div><div><span class="small muted">${w("Best SAT", "SAT 최고점")}</span><strong>${best ?? "—"}</strong><span class="small muted">${best !== null && state.satTarget !== null ? (best >= state.satTarget ? w("Target reached", "목표 달성") : w(`${state.satTarget - best} to ${state.satTarget}`, `목표 ${state.satTarget}까지 ${state.satTarget - best}`)) : ""}</span></div><div><span class="small muted">${w("AP plan", "AP 계획")}</span><strong>${state.ap.length}<small>${w(" subjects", "과목")}</small></strong><span class="small ${nextAp && nextAp.status === "checking-school" ? "overdue" : "muted"}">${nextAp ? w(...apStatusLabels[nextAp.status]) : ""}</span></div></section>`;
-  return `<div class="grades-head"><h1 class="home-title">${w("Grades", "성적")}</h1><div class="segmented" role="group" aria-label="${w("Grade", "학년")}">${[9, 10, 11, 12].map((g) => `<button data-grade-view="${g}" aria-pressed="${g === ui.grade}">${w(`Gr ${g}`, `${g}학년`)}</button>`).join("")}</div></div>
+  const summary = `<section class="grades-summary" aria-label="${w("Summary", "요약")}">${[
+    0, 1, 2,
+  ]
+    .map(
+      (i) =>
+        `<div${i === 0 ? ' class="is-dark"' : ""}>${gradeVariants(
+          stats.map((cards) => cards[i]),
+          ui.grade,
+          "grade-stat-variants",
+        )}</div>`,
+    )
+    .join(
+      "",
+    )}<div><span class="small muted">${w("Best SAT", "SAT 최고점")}</span><strong>${best ?? "—"}</strong><span class="small muted">${best !== null && state.satTarget !== null ? (best >= state.satTarget ? w("Target reached", "목표 달성") : w(`${state.satTarget - best} to ${state.satTarget}`, `목표 ${state.satTarget}까지 ${state.satTarget - best}`)) : ""}</span></div><div><span class="small muted">${w("AP plan", "AP 계획")}</span><strong>${state.ap.length}<small>${w(" subjects", "과목")}</small></strong><span class="small ${nextAp && nextAp.status === "checking-school" ? "overdue" : "muted"}">${nextAp ? w(...apStatusLabels[nextAp.status]) : ""}</span></div></section>`;
+  return `<div class="grades-head"><h1 class="home-title">${w("Grades", "성적")}</h1><div class="segmented" role="group" aria-label="${w("Grade", "학년")}">${gradeLevels.map((g) => `<button data-grade-view="${g}" aria-pressed="${g === ui.grade}">${w(`Gr ${g}`, `${g}학년`)}</button>`).join("")}</div></div>
   ${ui.notice ? `<div class="planner-notice" role="status">${esc(ui.notice)} ${ui.canUndo ? `<button id="undo-grades" class="text-button">${w("Undo", "실행 취소")}</button>` : ""}</div>` : ""}
   ${summary}
-  <section class="grades-card" aria-labelledby="school-marks-title"><div class="grades-card-head"><h2 id="school-marks-title">${w(`Ontario marks · Grade ${ui.grade}`, `온타리오 내신 · ${ui.grade}학년`)}</h2><button class="button" id="add-course">＋ ${w("Add course", "과목 추가")}</button></div>${marksList(state, courses)}</section>
+  <section class="grades-card" aria-labelledby="school-marks-title"><div class="grades-card-head"><h2 id="school-marks-title">${w(`Ontario marks · Grade ${ui.grade}`, `온타리오 내신 · ${ui.grade}학년`)}</h2><button class="button" id="add-course">＋ ${w("Add course", "과목 추가")}</button></div>${gradeVariants(
+    byGrade.map((courses) => marksList(state, courses)),
+    ui.grade,
+  )}</section>
   <div class="grades-two">${satCard(state)}${apCard(state)}</div>`;
 }
 
@@ -229,13 +269,20 @@ export function bindGradesPage(ctx: GradesContext) {
       b.addEventListener("click", () => {
         ctx.ui.grade = Number(b.dataset.gradeView);
         ctx.rerender();
+        document
+          .querySelector<HTMLButtonElement>(
+            '[data-grade-view][aria-pressed="true"]',
+          )
+          ?.focus({ preventScroll: true });
       }),
     );
   document
     .querySelector("#add-course")
     ?.addEventListener("click", () => openCourseEditor(ctx));
   document
-    .querySelectorAll<HTMLButtonElement>("[data-edit-course]")
+    .querySelectorAll<HTMLButtonElement>(
+      ".grade-variants > :not([inert]) [data-edit-course]",
+    )
     .forEach((b) =>
       b.addEventListener("click", () =>
         openCourseEditor(ctx, b.dataset.editCourse),
