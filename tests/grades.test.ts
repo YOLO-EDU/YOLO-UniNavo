@@ -144,3 +144,47 @@ test("stored data survives a round trip and malformed entries are dropped", () =
   assert.equal(cleaned.sat.length, 0);
   assert.equal(cleaned.ap.length, 0);
 });
+
+test("the U.S. GPA converts each Ontario mark and weights half credits", async () => {
+  const { usGpa, usPoints, courseCredit } = await import("../src/grades.ts");
+  assert.deepEqual(
+    [100, 80, 79.9, 70, 69, 56, 55, 50, 49].map(usPoints),
+    [4, 4, 3, 3, 2, 2, 1, 1, 0],
+  );
+  assert.equal(courseCredit("CHV2O1"), 0.5);
+  assert.equal(courseCredit("GLC2O1"), 0.5);
+  assert.equal(courseCredit("ENG2D1"), 1);
+  const c = (
+    code: string,
+    final: number | null,
+    midterm: number | null = null,
+  ) => ({
+    id: code,
+    code,
+    name: code,
+    grade: 10,
+    midterm,
+    final,
+    tag: "other" as const,
+    updatedBy: "student" as const,
+    updatedAt: "2026-07-07",
+  });
+  assert.equal(usGpa([]), null);
+  assert.equal(usGpa([c("SNC1W1", null)]), null);
+  // Taeyul's grade 10: five A credits, two B credits, a half A and a half B.
+  assert.equal(
+    usGpa([
+      c("BEP2O1", 92),
+      c("ENG2D1", 71),
+      c("SNC2D1", 76),
+      c("TGJ2O1", 94),
+      c("ADA2O1", 95),
+      c("CHV2O1", 81),
+      c("GLC2O1", 77),
+      c("HRE2O1", 86),
+      c("MPM2D1", 94),
+    ]),
+    3.69,
+  );
+  assert.equal(usGpa([c("MCR3U1", null, 86), c("CIA4U1", null, 70)]), 3.5);
+});

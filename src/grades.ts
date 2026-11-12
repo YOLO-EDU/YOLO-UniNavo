@@ -77,6 +77,34 @@ export function suggestTag(code: string): CourseTag {
 }
 
 export const courseScore = (c: CourseGrade) => c.final ?? c.midterm;
+// U.S. 4.0 GPA as U.S. credential evaluators compute it for Ontario: each
+// course's percentage becomes a letter (80-100 A, 70-79 B, 56-69 C, 50-55 D),
+// weighted by the course's credit. Source: NAIA InCred "International Academic
+// Published Standards - Canada", Ontario, last modified 2026-05-20. Each
+// university may still evaluate the transcript its own way.
+export const GPA_SOURCE_URL =
+  "https://www.naia.org/wp-content/uploads/2026/07/naiaincred-intlstandards-canada.pdf";
+export function usPoints(mark: number): number {
+  if (mark >= 80) return 4;
+  if (mark >= 70) return 3;
+  if (mark >= 56) return 2;
+  if (mark >= 50) return 1;
+  return 0;
+}
+// Ontario's grade 10 Civics (CHV2O) and Career Studies (GLC2O) are half credits.
+export const courseCredit = (code: string) =>
+  /^(CHV2|GLC2)/i.test(code.trim()) ? 0.5 : 1;
+export function usGpa(courses: CourseGrade[]): number | null {
+  let credits = 0,
+    points = 0;
+  for (const c of courses) {
+    const score = courseScore(c);
+    if (score === null) continue;
+    credits += courseCredit(c.code);
+    points += courseCredit(c.code) * usPoints(score);
+  }
+  return credits ? Math.round((points / credits) * 100) / 100 : null;
+}
 const round1 = (n: number) => Math.round(n * 10) / 10;
 export function simpleAverage(courses: CourseGrade[]): number | null {
   const scores = courses

@@ -6838,3 +6838,18 @@ footer .footer-copyright {
 .sync-status[data-state="denied"]::before {
   background: #f04438;
 }
+
+/* Reference GPA under the school average */
+.grades-summary .gpa-ref {
+  margin-top: 6px;
+  padding-top: 6px;
+  border-top: 1px solid rgb(255 255 255 / 0.18);
+  opacity: 0.85;
+  cursor: help;
+}
+.grades-summary .gpa-ref a {
+  margin-left: 6px;
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}

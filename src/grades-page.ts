@@ -1,5 +1,7 @@
 import { getLanguage, localize } from "./i18n.ts";
 import {
+  GPA_SOURCE_URL,
+  usGpa,
   coreAverage,
   gradeBand,
   removeAp,
@@ -91,7 +93,7 @@ function marksList(state: GradesState, courses: CourseGrade[]) {
       const low = score !== null && score < 75;
       const change = lastChange(state, c.id);
       const [en, ko] = tagShort[c.tag];
-      return `<div class="mark-row"><span class="mark-name"><strong data-original-language>${esc(c.name)}</strong>${en ? ` <span class="grade-tag tag-${c.tag}">${w(en, ko)}</span>` : ""}<small class="muted" data-original-language>${esc(c.code) || "—"} · ${c.final !== null ? w("Final", "최종") : w("Midterm", "중간")}</small></span><span class="mark-bar"><i class="${low ? "is-low" : c.tag === "other" ? "is-other" : ""}" style="width:${score === null ? 0 : pct(score)}%"></i></span><span class="num mark-score ${low ? "overdue" : ""}">${score ?? "—"}</span><span class="num ${change === null || change === 0 ? "muted" : change > 0 ? "up" : "overdue"}">${change === null || change === 0 ? "—" : `${change > 0 ? "▲" : "▼"} ${Math.abs(change)}`}</span><button class="icon-button mark-edit" data-edit-course="${c.id}" aria-label="${esc(w(`Edit ${c.name}`, `${c.name} 수정`))}">✎</button></div>`;
+      return `<div class="mark-row"><span class="mark-name"><strong data-original-language>${esc(c.name)}</strong>${en ? ` <span class="grade-tag tag-${c.tag}">${w(en, ko)}</span>` : ""}<small class="muted" data-original-language>${esc(c.code) || "—"} · ${c.final !== null ? w("Final", "최종") : c.midterm !== null ? w("Midterm", "중간") : w("No mark yet", "점수 없음")}</small></span><span class="mark-bar"><i class="${low ? "is-low" : c.tag === "other" ? "is-other" : ""}" style="width:${score === null ? 0 : pct(score)}%"></i></span><span class="num mark-score ${low ? "overdue" : ""}">${score ?? "—"}</span><span class="num ${change === null || change === 0 ? "muted" : change > 0 ? "up" : "overdue"}">${change === null || change === 0 ? "—" : `${change > 0 ? "▲" : "▼"} ${Math.abs(change)}`}</span><button class="icon-button mark-edit" data-edit-course="${c.id}" aria-label="${esc(w(`Edit ${c.name}`, `${c.name} 수정`))}">✎</button></div>`;
     })
     .join(
       "",
@@ -132,13 +134,15 @@ export function renderGradesPage(state: GradesState, ui: GradesUi) {
   const courses = state.courses.filter((c) => c.grade === ui.grade);
   const average = simpleAverage(courses),
     core = coreAverage(courses),
-    band = gradeBand(average);
+    band = gradeBand(average),
+    gpa = usGpa(courses),
+    totalGpa = usGpa(state.courses);
   const best = bestSat(state.sat);
   const coreNames = courses
     .filter((c) => c.tag === "required" || c.tag === "major")
     .map((c) => c.name);
   const nextAp = state.ap[0];
-  const summary = `<section class="grades-summary" aria-label="${w("Summary", "요약")}"><div class="is-dark"><span class="small">${w("School average", "내신 평균")}</span><strong>${average ?? "—"}${average !== null ? "<small>%</small>" : ""}</strong><span class="small">${average !== null ? `${band ? `${band} ${w("band", "구간")} · ` : ""}${w(`${courses.length} courses`, `${courses.length}과목`)}` : w("Add marks to see it", "점수를 넣으면 나와요")}</span></div><div><span class="small muted">${w("Required & major", "필수·전공 관련")}</span><strong>${core ?? "—"}${core !== null ? "<small>%</small>" : ""}</strong><span class="small muted" data-original-language>${esc(coreNames.join(" · "))}</span></div><div><span class="small muted">${w("Best SAT", "SAT 최고점")}</span><strong>${best ?? "—"}</strong><span class="small muted">${best !== null && state.satTarget !== null ? (best >= state.satTarget ? w("Target reached", "목표 달성") : w(`${state.satTarget - best} to ${state.satTarget}`, `목표 ${state.satTarget}까지 ${state.satTarget - best}`)) : ""}</span></div><div><span class="small muted">${w("AP plan", "AP 계획")}</span><strong>${state.ap.length}<small>${w(" subjects", "과목")}</small></strong><span class="small ${nextAp && nextAp.status === "checking-school" ? "overdue" : "muted"}">${nextAp ? w(...apStatusLabels[nextAp.status]) : ""}</span></div></section>`;
+  const summary = `<section class="grades-summary" aria-label="${w("Summary", "요약")}"><div class="is-dark"><span class="small">${w("School average", "내신 평균")}</span><strong>${average ?? "—"}${average !== null ? "<small>%</small>" : ""}</strong><span class="small">${average !== null ? `${band ? `${band} ${w("band", "구간")} · ` : ""}${w(`${courses.length} courses`, `${courses.length}과목`)}` : w("Add marks to see it", "점수를 넣으면 나와요")}</span>${gpa !== null ? `<span class="small gpa-ref">${w(`U.S. GPA ${gpa.toFixed(2)} / 4.0`, `미국식 GPA ${gpa.toFixed(2)} / 4.0`)}${totalGpa !== null && totalGpa !== gpa ? ` · ${w(`all grades ${totalGpa.toFixed(2)}`, `전 학년 누적 ${totalGpa.toFixed(2)}`)}` : ""}<a href="${GPA_SOURCE_URL}" target="_blank" rel="noopener noreferrer" title="${w("Each course: 80–100 A(4), 70–79 B(3), 56–69 C(2), 50–55 D(1), weighted by credit. Published U.S. evaluation standard for Ontario (NAIA InCred, May 2026). Universities may evaluate differently.", "과목마다 80–100 A(4), 70–79 B(3), 56–69 C(2), 50–55 D(1)로 바꿔 학점 가중 평균. 미국 평가기관이 공개한 온타리오 기준(NAIA InCred, 2026년 5월). 대학마다 다르게 평가할 수 있어요.")}">${w("Basis ↗", "기준 ↗")}</a></span>` : ""}</div><div><span class="small muted">${w("Required & major", "필수·전공 관련")}</span><strong>${core ?? "—"}${core !== null ? "<small>%</small>" : ""}</strong><span class="small muted" data-original-language>${esc(coreNames.join(" · "))}</span></div><div><span class="small muted">${w("Best SAT", "SAT 최고점")}</span><strong>${best ?? "—"}</strong><span class="small muted">${best !== null && state.satTarget !== null ? (best >= state.satTarget ? w("Target reached", "목표 달성") : w(`${state.satTarget - best} to ${state.satTarget}`, `목표 ${state.satTarget}까지 ${state.satTarget - best}`)) : ""}</span></div><div><span class="small muted">${w("AP plan", "AP 계획")}</span><strong>${state.ap.length}<small>${w(" subjects", "과목")}</small></strong><span class="small ${nextAp && nextAp.status === "checking-school" ? "overdue" : "muted"}">${nextAp ? w(...apStatusLabels[nextAp.status]) : ""}</span></div></section>`;
   return `<div class="grades-head"><h1 class="home-title">${w("Grades", "성적")}</h1><div class="segmented" role="group" aria-label="${w("Grade", "학년")}">${[9, 10, 11, 12].map((g) => `<button data-grade-view="${g}" aria-pressed="${g === ui.grade}">${w(`Gr ${g}`, `${g}학년`)}</button>`).join("")}</div></div>
   ${ui.notice ? `<div class="planner-notice" role="status">${esc(ui.notice)} ${ui.canUndo ? `<button id="undo-grades" class="text-button">${w("Undo", "실행 취소")}</button>` : ""}</div>` : ""}
   ${summary}
