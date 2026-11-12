@@ -395,3 +395,10 @@ main .pos-chip {
       inset 0 1px 0 #ffffff;
   }
 }
+
+/* style.css paints :root a flat colour, and :root outranks the html selector
+   above. Clear it so body's gradient propagates to the whole canvas and short
+   pages do not end in a flat band below the footer. */
+:root {
+  background: none;
+}
