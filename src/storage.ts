@@ -1,4 +1,5 @@
 import { normalizeProfile } from "./recommendations.ts";
+import { noteWrite } from "./sync.ts";
 export function readLocal(key: string): unknown {
   try {
     return JSON.parse(localStorage.getItem(`uninavo:v1:${key}`) ?? "null");
@@ -9,6 +10,7 @@ export function readLocal(key: string): unknown {
 export function writeLocal(key: string, value: unknown): boolean {
   try {
     localStorage.setItem(`uninavo:v1:${key}`, JSON.stringify(value));
+    noteWrite(key);
     return true;
   } catch {
     return false;

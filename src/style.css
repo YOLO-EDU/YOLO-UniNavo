@@ -6811,3 +6811,30 @@ footer .footer-copyright {
   line-height: 1.6;
   color: #7b8580;
 }
+
+/* Sync status */
+.sync-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.8rem;
+  color: var(--muted, #667085);
+  white-space: nowrap;
+}
+.sync-status::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #98a2b3;
+}
+.sync-status[data-state="synced"]::before {
+  background: #12b76a;
+}
+.sync-status[data-state="saving"]::before {
+  background: #f79009;
+}
+.sync-status[data-state="offline"]::before,
+.sync-status[data-state="denied"]::before {
+  background: #f04438;
+}

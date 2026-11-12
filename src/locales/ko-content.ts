@@ -135,7 +135,7 @@ const apKo: Record<string, Record<string, string>> = {
     target: "현재 ASU 예시에서는 4~5점 목표 · 입학 필수 요건 아님",
     credit: "ASU는 현재 4~5점에 PSY 101의 3학점을 인정합니다.",
   },
-  "microeconomics": {
+  microeconomics: {
     name: "AP 미시경제학 (Microeconomics)",
     reason:
       "수요·공급, 소비자와 기업의 의사결정, 시장 구조를 배워 경제학·경영학·사회과학 탐색에 도움이 됩니다.",
