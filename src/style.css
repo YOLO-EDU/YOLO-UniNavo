@@ -6853,3 +6853,10 @@ footer .footer-copyright {
   text-decoration: underline;
   text-underline-offset: 2px;
 }
+
+.home-uni-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 16px;
+  margin-top: 8px;
+}

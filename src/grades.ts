@@ -77,19 +77,31 @@ export function suggestTag(code: string): CourseTag {
 }
 
 export const courseScore = (c: CourseGrade) => c.final ?? c.midterm;
-// U.S. 4.0 GPA as U.S. credential evaluators compute it for Ontario: each
-// course's percentage becomes a letter (80-100 A, 70-79 B, 56-69 C, 50-55 D),
-// weighted by the course's credit. Source: NAIA InCred "International Academic
-// Published Standards - Canada", Ontario, last modified 2026-05-20. Each
-// university may still evaluate the transcript its own way.
+// Reference 4.0 GPA with +/- steps: each course's percentage is converted on
+// its own, then weighted by the course's credit. The steps follow the OMSAS
+// 4.0 conversion table that OUAC publishes (90-100 4.0, 85-89 3.9, 80-84 3.7,
+// 77-79 3.3, 73-76 3.0, 70-72 2.7, 67-69 2.3, 63-66 2.0, 60-62 1.7, 57-59 1.3,
+// 53-56 1.0, 50-52 0.7). That table was made for Ontario university marks, so
+// this is a finer-grained reference, not an official high-school conversion;
+// U.S. colleges read the Ontario percentages on the transcript.
 export const GPA_SOURCE_URL =
-  "https://www.naia.org/wp-content/uploads/2026/07/naiaincred-intlstandards-canada.pdf";
+  "https://www.ouac.on.ca/guide/omsas-gpa-calculations/";
+const GPA_STEPS: [number, number][] = [
+  [90, 4],
+  [85, 3.9],
+  [80, 3.7],
+  [77, 3.3],
+  [73, 3],
+  [70, 2.7],
+  [67, 2.3],
+  [63, 2],
+  [60, 1.7],
+  [57, 1.3],
+  [53, 1],
+  [50, 0.7],
+];
 export function usPoints(mark: number): number {
-  if (mark >= 80) return 4;
-  if (mark >= 70) return 3;
-  if (mark >= 56) return 2;
-  if (mark >= 50) return 1;
-  return 0;
+  return GPA_STEPS.find(([min]) => mark >= min)?.[1] ?? 0;
 }
 // Ontario's grade 10 Civics (CHV2O) and Career Studies (GLC2O) are half credits.
 export const courseCredit = (code: string) =>

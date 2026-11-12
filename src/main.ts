@@ -1,4 +1,6 @@
 import "./style.css";
+import "./glass.css";
+import "./system.css";
 import { getLanguage, setLanguage, translate, localize } from "./i18n.ts";
 import { universities, sources, sourceMap, planning } from "./data/index.ts";
 import { evidenceMap } from "./data/evidence.ts";
@@ -108,12 +110,44 @@ let browseFilters: BrowseFilters = {
 };
 let matrixCell: string | null = null;
 
+const navIcon = (paths: string) =>
+  `<svg class="nav-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${paths}</svg>`;
 const nav = [
-  { id: "home", label: "Home", icon: "◷" },
-  { id: "grades", label: "Grades", icon: "▥" },
-  { id: "universities", label: "Universities", icon: "▦" },
-  { id: "sat", label: "Test prep", icon: "✧" },
-  { id: "report", label: "Reports", icon: "▤" },
+  {
+    id: "home",
+    label: "Home",
+    icon: navIcon(
+      '<path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V20h5v-6h4v6h5V9.5"/>',
+    ),
+  },
+  {
+    id: "grades",
+    label: "Grades",
+    icon: navIcon(
+      '<path d="M4 20V4"/><path d="M4 20h16"/><path d="M8 16v-5"/><path d="M12 16V8"/><path d="M16 16v-3"/>',
+    ),
+  },
+  {
+    id: "universities",
+    label: "Universities",
+    icon: navIcon(
+      '<path d="M2 9 12 4l10 5-10 5z"/><path d="M6 11v5c0 1.5 2.7 3 6 3s6-1.5 6-3v-5"/><path d="M22 9v6"/>',
+    ),
+  },
+  {
+    id: "sat",
+    label: "Test prep",
+    icon: navIcon(
+      '<path d="M4 20h4L19 9l-4-4L4 16z"/><path d="m13.5 6.5 4 4"/>',
+    ),
+  },
+  {
+    id: "report",
+    label: "Reports",
+    icon: navIcon(
+      '<path d="M14 3H6v18h12V7z"/><path d="M14 3v4h4"/><path d="M9 12h6"/><path d="M9 16h6"/>',
+    ),
+  },
 ];
 const examTabs = ["sat", "ap", "resources"];
 const routes = [
@@ -253,8 +287,13 @@ function openTaskEditor(id?: string, monthId?: string) {
 }
 function universitiesPage() {
   const mine = gradeInput(grades);
-  if (scenarioFromGrades && mine?.band && mine.sat !== null)
-    scenarioInput = normalizeCandidateInput({ band: mine.band, sat: mine.sat });
+  // Grades set the band; the SAT comes from a score, else the target, else
+  // the list keeps the SAT already shown (labelled on the page).
+  if (scenarioFromGrades && mine?.band)
+    scenarioInput = normalizeCandidateInput({
+      band: mine.band,
+      sat: mine.sat ?? grades.satTarget ?? scenarioInput.sat,
+    });
   return renderExplorer(scenarioInput, explorerMode, explorerSearch, saved, {
     mine,
     fromGrades: scenarioFromGrades,
@@ -796,6 +835,16 @@ function openUniversity(id: string, tab: DetailTab = "summary") {
 document.querySelector(".skip")?.addEventListener("click", (event) => {
   event.preventDefault();
   document.getElementById("main")?.focus();
+});
+// Cancel in any inline add form: clear what was typed and fold the form away.
+document.addEventListener("click", (event) => {
+  const button = (event.target as Element | null)?.closest<HTMLButtonElement>(
+    "[data-close-form]",
+  );
+  if (!button) return;
+  button.closest("form")?.reset();
+  const details = button.closest("details");
+  if (details) details.open = false;
 });
 window.addEventListener("hashchange", () => {
   const linked = parseReportHash(location.hash);

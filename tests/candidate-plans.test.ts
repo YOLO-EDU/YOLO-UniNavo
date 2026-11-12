@@ -137,9 +137,8 @@ test("live explorer uses names and ten candidates, with SAT entry only in the sc
   const result = renderExplorer(input(), "scenario", "", new Set());
   assert.equal(
     (
-      result.match(
-        /<tr><th scope="row"><button class="link-button" data-detail=/g,
-      ) ?? []
+      result.match(/<button class="link-button browse-name" data-detail=/g) ??
+      []
     ).length,
     10,
   );

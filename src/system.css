@@ -1,0 +1,860 @@
+/* Shared design standard. Every screen uses the same type scale, card
+   padding, corner radius, control height and chip size, so pages feel like
+   one app. Loaded last so it overrides the per-page sections in style.css. */
+
+:root {
+  /* Type scale */
+  --fs-xs: 12px; /* tags, chips, course codes, captions */
+  --fs-sm: 14px; /* labels, secondary text, help text */
+  --fs-base: 15px; /* body text, buttons, tabs, links */
+  --fs-title: 17px; /* item titles inside cards, lead sentence */
+  --fs-section: 20px; /* section headings (h2) */
+  --fs-stat: 24px; /* big numbers on summary cards */
+  --fs-page: 36px; /* page titles (h1) */
+
+  /* Boxes: three levels only.
+     card    = page sections (.panel)            22/24 padding, 18 radius
+     compact = summary cards, small side panels  16/18 padding, 18 radius
+     tile    = rows/blocks inside a card         10/14 padding, 14 radius */
+  --pad-card: 22px 24px;
+  --pad-compact: 16px 18px;
+  --pad-tile: 10px 14px;
+  --r-card: 18px;
+  --r-tile: 14px;
+  --r-inner: 12px; /* inputs */
+  --r-pill: 999px;
+  --gap-cards: 16px;
+  --gap-tiles: 8px;
+
+  /* Controls */
+  --control-h: 40px;
+  --chip-h: 24px;
+  --icon-size: 36px;
+}
+
+/* Type */
+main {
+  font-size: var(--fs-base);
+}
+main h1.home-title {
+  font-size: var(--fs-page) !important;
+  line-height: 1.15;
+}
+main h2 {
+  font-size: var(--fs-section) !important;
+  line-height: 1.3;
+}
+main .method-notes h2 {
+  font-size: var(--fs-title) !important;
+}
+main .home-summary {
+  font-size: var(--fs-title) !important;
+}
+main .home-task-title,
+main .task-row,
+main .mark-name strong {
+  font-size: var(--fs-base) !important;
+}
+main .ahead-card strong,
+main .scenario-accuracy strong,
+main summary strong {
+  font-size: var(--fs-title) !important;
+}
+main .grades-card > p.muted,
+main label,
+main legend,
+main summary.methodology,
+main .source-disclosure summary {
+  font-size: var(--fs-sm) !important;
+}
+main small:not(strong small):not(.grades-summary small) {
+  font-size: var(--fs-xs) !important;
+}
+main .grades-summary > div > strong,
+main strong.stat {
+  font-size: var(--fs-stat) !important;
+  line-height: 1.1;
+}
+
+/* Buttons, links and tabs share one size */
+main .button,
+main .text-button,
+main .text-link,
+main .link-button,
+main .segmented button,
+main .prep-tabs a,
+main .section-tabs button {
+  font-size: var(--fs-base) !important;
+}
+main .button {
+  min-height: var(--control-h);
+  padding: 0 18px !important;
+  border-radius: var(--r-pill) !important;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+main .icon-button {
+  min-width: var(--icon-size);
+  height: var(--icon-size) !important;
+  border-radius: 10px !important;
+}
+
+/* Chips and tags */
+main .task-tag,
+main .grade-tag,
+main .pos-chip {
+  font-size: var(--fs-xs) !important;
+  min-height: var(--chip-h);
+  border-radius: var(--r-pill) !important;
+  display: inline-flex;
+  align-items: center;
+}
+main .status-chip,
+main .period-chip {
+  font-size: var(--fs-sm) !important;
+  height: 36px !important;
+  border-radius: var(--r-pill) !important;
+}
+
+/* Cards */
+main .grades-card,
+main .method-notes {
+  padding: var(--pad-card) !important;
+  border-radius: var(--r-card) !important;
+}
+main .grades-summary > div,
+main .diff-card {
+  padding: var(--pad-compact) !important;
+  border-radius: var(--r-card) !important;
+}
+main .basis-strip {
+  border-radius: var(--r-card) !important;
+}
+main input:not([type="checkbox"]):not([type="radio"]),
+main select,
+main textarea {
+  border-radius: var(--r-inner) !important;
+  font-size: var(--fs-base);
+}
+
+/* Stragglers found by the size audit */
+main .band-row span,
+main .band-chips button span {
+  font-size: var(--fs-xs) !important;
+}
+main .mark-score {
+  font-size: var(--fs-title) !important;
+}
+main .scenario-accuracy p {
+  font-size: var(--fs-base) !important;
+}
+main .is-manual strong {
+  font-size: var(--fs-stat) !important;
+  line-height: 1.1;
+}
+
+/* Home density: boxes fit their content. */
+@media (min-width: 1001px) {
+  main .home-glance {
+    grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr) minmax(0, 1fr);
+  }
+}
+main .home-glance > .panel,
+main .glance-deadline {
+  padding: var(--pad-compact) !important;
+}
+main .glance-sat {
+  align-content: center;
+}
+main .dday-badge {
+  width: 60px;
+  height: 60px;
+  border-radius: 14px;
+}
+main .ring {
+  width: 56px;
+  height: 56px;
+}
+main .ring > span {
+  width: 42px;
+  height: 42px;
+  font-size: var(--fs-sm);
+}
+main .home-task {
+  padding: 10px 0;
+  gap: 12px;
+}
+main .home-task .task-tags {
+  margin-top: 3px;
+}
+main .quick-task {
+  margin-top: 10px;
+}
+main .quick-task input {
+  min-height: var(--control-h);
+}
+main .ahead-tasks {
+  line-height: 1.5;
+  margin-top: 4px;
+}
+/* Right column: shortlist on top, the next three months stacked below. */
+main .home-side {
+  display: grid;
+  gap: 20px;
+}
+main .home-side > .panel {
+  margin: 0;
+}
+main .home-ahead .panel-head {
+  flex-wrap: wrap;
+  gap: 4px 12px;
+}
+main .home-ahead .ahead-grid {
+  grid-template-columns: 1fr;
+  gap: 10px;
+}
+main .home-ahead .ahead-card strong {
+  font-size: var(--fs-base) !important;
+}
+main .home-ahead .ahead-tasks {
+  line-height: 1.4;
+  margin-top: 2px;
+}
+@media (min-width: 1001px) {
+  main .home-split {
+    align-items: stretch;
+  }
+  main .home-split > .panel {
+    margin: 0;
+  }
+}
+
+/* "SAT가 오르면" strip: compact glass tiles, the explanation spans two columns. */
+main .sat-outlook {
+  padding: var(--pad-compact) !important;
+}
+main .sat-outlook h2 {
+  margin: 0 0 10px;
+}
+main .outlook-steps {
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+}
+@media (min-width: 1001px) {
+  main .outlook-steps > div.is-wide {
+    grid-column: span 2;
+  }
+}
+main .outlook-steps .text-button {
+  justify-self: start;
+  margin-top: 4px;
+  padding: 0 !important;
+  min-height: 0;
+  line-height: 1.4;
+}
+
+/* Grades page: five equal stat cards, and SAT / AP panels of equal height
+   with their actions kept small. */
+@media (min-width: 1001px) {
+  main .grades-summary {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 12px;
+  }
+}
+@media (min-width: 761px) and (max-width: 1000px) {
+  main .grades-summary {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+main .grades-summary > div,
+main .report-stats > .panel {
+  gap: 4px;
+  padding: 14px 18px !important;
+}
+main .grades-summary .small,
+main .report-stats > .panel > .small {
+  font-size: var(--fs-xs) !important;
+  line-height: 1.4;
+}
+main .report-stats > .panel {
+  min-height: 0;
+  margin: 0;
+}
+main .grades-summary > div > strong,
+main .report-stats strong.stat {
+  line-height: 1.05;
+  letter-spacing: -0.01em;
+}
+main .grades-two {
+  align-items: stretch;
+}
+main .grades-two > .grades-card {
+  padding: 14px 18px !important;
+}
+main .grades-two .grades-card-head {
+  margin-bottom: 6px;
+  min-height: 32px;
+  align-items: center;
+}
+main .grades-two .grades-card > p {
+  margin: 0 0 10px;
+}
+main .grades-two .inline-form {
+  margin-top: 0;
+}
+main .inline-form > summary.button {
+  min-height: 32px;
+  padding: 0 14px !important;
+  font-size: var(--fs-sm) !important;
+}
+main .grades-card-head .target-line {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+}
+main .grades-card-head .target-line label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--fs-sm) !important;
+}
+main .grades-card-head .target-line input {
+  width: 76px;
+  height: 32px;
+  min-height: 0 !important;
+  padding: 0 10px;
+}
+
+/* ---------------------------------------------------------------
+   Shared spec, applied everywhere. New boxes should reuse one of these
+   lists instead of adding their own padding, radius or font size.
+   --------------------------------------------------------------- */
+
+/* Compact cards */
+main .glance-deadline,
+main .report-status,
+main .planner-total,
+main .journey-chart {
+  padding: var(--pad-compact) !important;
+  border-radius: var(--r-card) !important;
+}
+main .month-card {
+  padding: var(--pad-card) !important;
+  border-radius: var(--r-card) !important;
+}
+
+/* Tiles: one glass tile style for every row or block inside a card */
+main .mark-row,
+main .combo-row,
+main .outlook-steps > div,
+main .ahead-card,
+main .report-task,
+main .stage {
+  box-sizing: border-box;
+  padding: var(--pad-tile) !important;
+  border: 1px solid rgb(255 255 255 / 0.85) !important;
+  border-radius: var(--r-tile) !important;
+  background: rgb(255 255 255 / 0.38) !important;
+  box-shadow: inset 0 1px 0 #ffffff;
+  outline: none;
+}
+main .outlook-steps > div.is-next,
+main .stage.is-now {
+  border-color: rgb(38 90 95 / 0.45) !important;
+  background: rgb(255 255 255 / 0.6) !important;
+}
+main .outlook-steps > div.is-back {
+  background: rgb(255 255 255 / 0.22) !important;
+}
+main .mark-row + .mark-row,
+main .report-task + .report-task,
+main .stage + .stage {
+  margin-top: var(--gap-tiles);
+}
+main .combo-rows,
+main .outlook-steps,
+main .ahead-grid {
+  column-gap: var(--gap-cards);
+  row-gap: var(--gap-tiles);
+}
+main .combo-row {
+  min-height: 60px;
+}
+main .combo-row > span:first-child small {
+  display: block;
+  margin-top: 2px;
+}
+main .combo-row > span:last-child {
+  text-align: right;
+}
+main .combo-row .combo-norange {
+  grid-column: 2 / -1;
+  text-align: right;
+}
+
+/* Type stragglers found by the full-page audit: every size maps onto the
+   scale above (12 / 14 / 15 / 17 / 20 / 28 / 36). */
+main .bar-caption span {
+  font-size: var(--fs-xs) !important;
+}
+main .grades-summary strong small,
+main .stat > small {
+  font-size: var(--fs-sm) !important;
+  font-weight: 500;
+}
+main .month-date > span,
+main .add-task {
+  font-size: var(--fs-base) !important;
+}
+main .planner-total span {
+  font-size: var(--fs-sm) !important;
+}
+main .mark-edit,
+main .period-chips .icon-button,
+main .planner-heading p {
+  font-size: var(--fs-title) !important;
+}
+main .dday-badge strong,
+main .ap-pick .ap-num {
+  font-size: var(--fs-section) !important;
+}
+main .month-date > span.month-number {
+  font-size: var(--fs-stat) !important;
+  line-height: 1.1;
+}
+main .planner-total strong {
+  font-size: var(--fs-stat) !important;
+  line-height: 1.05;
+}
+main .planner-heading h1 {
+  font-size: var(--fs-page) !important;
+  line-height: 1.15;
+}
+main .kind-choice label {
+  min-height: var(--control-h);
+  border-radius: var(--r-pill) !important;
+}
+main .kind-choice legend {
+  font-size: var(--fs-sm) !important;
+}
+main .grades-summary a {
+  color: inherit;
+  text-underline-offset: 2px;
+}
+main .grades-card-head .target-line button {
+  min-height: 0;
+  padding: 0 4px !important;
+}
+
+/* "SAT가 오르면" tiles: score and result share the first line, so each tile
+   is about three short lines instead of four stacked ones. */
+main .outlook-steps > div {
+  grid-template-columns: auto minmax(0, 1fr);
+  column-gap: 8px;
+  row-gap: 2px;
+  align-items: baseline;
+  outline: none !important;
+}
+main .outlook-steps > div > :not(:first-child):not(strong) {
+  grid-column: 1 / -1;
+}
+main .outlook-steps > div > strong:first-child {
+  grid-column: 1 / -1;
+}
+main .outlook-steps > div.is-next {
+  border-width: 1.5px !important;
+}
+main .outlook-steps > div > * {
+  line-height: 1.35;
+}
+main .outlook-steps .text-button {
+  margin-top: 2px;
+}
+
+/* SAT steps strip: no heading, slim tiles. */
+main .sat-outlook {
+  padding: 10px !important;
+}
+main .sat-outlook .outlook-steps {
+  gap: 8px;
+}
+main .sat-outlook .outlook-steps > div {
+  padding: 8px 12px !important;
+}
+
+/* Basis strips (test prep summary and similar): compact cells, small
+   labels, slim inline inputs. */
+main .basis-strip > div {
+  padding: 12px 18px !important;
+  gap: 2px;
+}
+main .basis-strip > div > .small {
+  font-size: var(--fs-xs) !important;
+  line-height: 1.4;
+}
+main .basis-strip strong,
+main .basis-strip .is-manual strong {
+  font-size: var(--fs-section) !important;
+  line-height: 1.2;
+}
+main .basis-strip .text-link {
+  line-height: 1.4;
+}
+main .basis-strip form {
+  margin: 0;
+}
+main .basis-strip input {
+  height: 32px;
+  min-height: 0 !important;
+  width: 90px;
+}
+main .basis-strip form button {
+  min-height: 0;
+  padding: 0 4px !important;
+}
+
+/* ---------------------------------------------------------------
+   Dialogs live outside <main>, so they get the shared spec here:
+   compact width, glass header, 40px fields, pill buttons.
+   --------------------------------------------------------------- */
+dialog {
+  font-size: var(--fs-base);
+}
+dialog .dialog-header {
+  padding: 14px 20px !important;
+  background: rgb(255 255 255 / 0.35) !important;
+  border-bottom: 1px solid rgb(255 255 255 / 0.7) !important;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+dialog .dialog-header h2,
+#task-dialog h2 {
+  margin: 0;
+  font-size: var(--fs-section) !important;
+  line-height: 1.3;
+}
+dialog .close-dialog {
+  width: 32px;
+  height: 32px;
+  font-size: var(--fs-title);
+  border: 1px solid rgb(255 255 255 / 0.9);
+  background: rgb(255 255 255 / 0.5);
+}
+#task-dialog {
+  max-width: 480px;
+  padding: 0 !important;
+  border-radius: 22px !important;
+}
+#task-dialog .task-form-fields {
+  padding: 16px 20px 18px;
+  gap: 12px;
+}
+dialog .task-form-fields label {
+  gap: 4px;
+  font-size: var(--fs-sm);
+}
+dialog .task-form-fields input,
+dialog .task-form-fields select {
+  height: var(--control-h);
+  padding: 0 12px;
+  border-radius: var(--r-inner) !important;
+  font-size: var(--fs-base);
+}
+dialog .task-form-fields textarea {
+  height: 112px;
+  padding: 8px 12px;
+  border-radius: var(--r-inner) !important;
+  font-size: var(--fs-base);
+}
+dialog .grades-form-pair {
+  gap: 12px;
+}
+dialog .form-actions {
+  align-items: center;
+  gap: 16px;
+  margin-top: 4px;
+}
+dialog .button {
+  min-height: var(--control-h);
+  padding: 0 20px !important;
+  border-radius: var(--r-pill) !important;
+  font-size: var(--fs-base) !important;
+}
+dialog .text-button {
+  font-size: var(--fs-sm) !important;
+}
+
+/* Add forms inside the SAT / AP cards: standard 40px fields, actions on the
+   right with Cancel before the primary button. */
+main .grades-form,
+main .ap-add {
+  margin-top: 4px;
+  gap: 10px;
+}
+main .grades-form label,
+main .ap-add label {
+  gap: 4px;
+  font-size: var(--fs-sm);
+}
+main .grades-form input,
+main .ap-add input,
+main .ap-add select {
+  height: var(--control-h);
+  min-height: 0 !important;
+  padding: 0 12px;
+}
+main .grades-form .form-actions,
+main .ap-add .form-actions,
+main .journal-form .form-actions {
+  flex: 1 0 100%;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 16px;
+}
+main .ap-add .text-button,
+main .grades-form .text-button,
+main .journal-form .text-button {
+  min-height: var(--control-h);
+  font-size: var(--fs-sm) !important;
+}
+
+/* Report page: same stat cards as grades (above), compact side panels, and
+   secondary text at the shared 14px instead of body size. */
+main .home-side > .panel {
+  padding: var(--pad-compact) !important;
+}
+main .report-main .panel > p.muted,
+main .report-flow .panel > p.muted,
+main .home-side .panel > p.muted,
+main .upcoming-line,
+main .upcoming-line > span,
+main .date-row > *,
+main .report-tone {
+  font-size: var(--fs-sm) !important;
+}
+main .date-row > strong {
+  font-weight: 600;
+}
+main .report-status {
+  align-items: center;
+}
+main .report-stats {
+  margin-bottom: var(--gap-cards) !important;
+  gap: 12px;
+}
+main .home-side {
+  align-content: start;
+}
+main .journal-form {
+  display: grid;
+  gap: 10px;
+  margin-top: 4px;
+}
+main .journal-form label {
+  display: grid;
+  gap: 4px;
+  font-size: var(--fs-sm);
+}
+main .journal-form input {
+  height: var(--control-h);
+  min-height: 0 !important;
+  padding: 0 12px;
+}
+main .journal-form textarea {
+  padding: 8px 12px;
+}
+main .journal-form .button {
+  width: auto !important;
+}
+
+/* ---------------------------------------------------------------
+   Layout grid: home and report sit on one 4-column grid with the same
+   16px gap in every row and between rows, so box edges line up
+   (columns at 1/4, 1/2, 3/4) and rows are evenly spaced.
+   --------------------------------------------------------------- */
+main .home-glance,
+main .report-stats,
+main .report-flow,
+main .home-split,
+main .grades-summary,
+main .grades-two {
+  gap: var(--gap-cards) !important;
+  margin-top: 0 !important;
+  margin-bottom: var(--gap-cards) !important;
+}
+main .home-side,
+main .report-main {
+  display: grid;
+  gap: var(--gap-cards);
+  align-content: start;
+}
+main .home-side > *,
+main .report-main > *,
+main .report-flow > *,
+main .home-split > .panel {
+  margin: 0 !important;
+}
+@media (min-width: 1001px) {
+  main .home-glance,
+  main .report-stats {
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  }
+  main .glance-deadline {
+    grid-column: span 2;
+  }
+  main .report-flow,
+  main .home-split,
+  main .grades-two {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}
+@media (min-width: 1001px) {
+  /* Both columns end on the same line: the right column's last panel
+     takes up any remaining height. */
+  main .home-side,
+  main .report-main {
+    display: flex;
+    flex-direction: column;
+  }
+  main .home-side > :last-child,
+  main .report-main > :last-child {
+    flex: 1 1 auto;
+  }
+}
+/* Report toolbar never pushes the page sideways: it wraps, and the week
+   chips scroll inside their own row if they still do not fit. */
+main .report-toolbar {
+  flex-wrap: wrap;
+  row-gap: 8px;
+}
+main .period-chips {
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: auto;
+}
+main .period-chips {
+  scrollbar-width: none;
+}
+@media (max-width: 1000px) {
+  main .report-toolbar .period-chips {
+    order: 3;
+    flex: 1 0 100%;
+  }
+}
+
+/* Done rows on the report can be unchecked to reopen the task. */
+main .report-task.is-done > span:not(.small) {
+  color: var(--muted);
+  text-decoration: line-through;
+  text-decoration-color: rgb(74 90 94 / 0.45);
+}
+
+/* Last spec stragglers: SAT band chips, report arrows, roadmap add buttons. */
+main .band-chips button,
+main .add-task {
+  border-radius: var(--r-pill) !important;
+}
+main .period-chips .icon-button {
+  border-radius: var(--r-pill) !important;
+}
+
+/* University detail drawer (a dialog, outside <main>). */
+dialog.drawer .drawer-title > h2 {
+  font-size: var(--fs-page) !important;
+  line-height: 1.15;
+}
+dialog.drawer .drawer-title > span,
+dialog.drawer .bar-caption span,
+dialog.drawer small,
+dialog.drawer .strong-orange {
+  font-size: var(--fs-xs) !important;
+}
+dialog.drawer .verified-rule-tag,
+dialog.drawer .dialog-body > .text-link {
+  font-size: var(--fs-sm) !important;
+}
+dialog.drawer .verified-rule-tag {
+  border-radius: var(--r-pill) !important;
+  padding: 6px 12px !important;
+}
+dialog.drawer .dialog-body div[style*="border"],
+dialog.drawer .dialog-body > div > div {
+  border-radius: var(--r-tile);
+}
+dialog.drawer textarea {
+  border-radius: var(--r-inner) !important;
+}
+dialog.drawer .close-dialog {
+  font-size: var(--fs-title) !important;
+}
+/* Home to-do panel: when it stretches to match the right column, the add
+   field sits at the bottom instead of leaving an empty band under it. */
+@media (min-width: 1001px) {
+  main .home-split > .panel {
+    display: flex;
+    flex-direction: column;
+  }
+  main .home-split > .panel > .quick-task {
+    margin-top: auto;
+    padding-top: 10px;
+  }
+}
+main .planner-notice {
+  border-radius: var(--r-tile) !important;
+}
+
+/* Button hierarchy: dark glossy = the one main action (save, add, confirm);
+   light glass = secondary actions that open a form or add to a list. */
+main .button.button-light {
+  background: linear-gradient(
+    180deg,
+    rgb(255 255 255 / 0.85),
+    rgb(255 255 255 / 0.55)
+  ) !important;
+  color: #1f4d52 !important;
+  border: 1px solid #ffffff !important;
+  box-shadow:
+    0 4px 12px rgb(32 61 65 / 0.1),
+    inset 0 1px 0 #ffffff !important;
+}
+main .button.button-light:hover {
+  background: #ffffff !important;
+}
+main .ap-pick .button {
+  min-height: 32px;
+  padding: 0 14px !important;
+  font-size: var(--fs-sm) !important;
+}
+
+/* Phone width */
+@media (max-width: 760px) {
+  .sidebar .education-brand {
+    padding: 6px 0 !important;
+    margin: 0 !important;
+  }
+  .sidebar .education-brand img {
+    height: 22px !important;
+    width: auto !important;
+  }
+  main .segmented button {
+    white-space: nowrap;
+    padding-inline: 10px !important;
+  }
+  main .grades-summary > :last-child:nth-child(odd) {
+    grid-column: 1 / -1;
+  }
+  .topbar {
+    min-height: 0 !important;
+    height: auto !important;
+    padding: 10px 20px !important;
+    row-gap: 6px !important;
+  }
+  .topbar .language-toggle {
+    min-height: 32px !important;
+    height: 32px !important;
+    padding: 0 12px !important;
+  }
+}

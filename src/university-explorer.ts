@@ -111,16 +111,6 @@ const positionClass: Record<SatPosition, string> = {
   "no-data": "pos-other",
   "not-considered": "pos-other",
 };
-function positionChip(s: ScenarioSchool, sat: number | null) {
-  const p = satPosition(s, sat);
-  const gap =
-    p === "below" && sat !== null
-      ? w(`${s.satRange!.low - sat} below`, `${s.satRange!.low - sat}점 아래`)
-      : p === "above" && sat !== null
-        ? w(`${sat - s.satRange!.high} above`, `${sat - s.satRange!.high}점 위`)
-        : w(...positionLabels[p]);
-  return `<span class="pos-chip ${positionClass[p]}">${gap}</span>${p === "below" ? `<span class="small muted pos-note">${w(`In range from ${s.satRange!.low}`, `${s.satRange!.low}부터 범위 안`)}</span>` : ""}`;
-}
 function positionChipOnly(s: ScenarioSchool, sat: number | null) {
   const p = satPosition(s, sat);
   const label =
@@ -131,6 +121,7 @@ function positionChipOnly(s: ScenarioSchool, sat: number | null) {
         : p === "within"
           ? w("Within range", "범위 안")
           : w(...positionLabels[p]);
+  if (p === "no-data") return `<span class="muted">—</span>`;
   return `<span class="pos-chip ${positionClass[p]}">${label}</span>`;
 }
 // A 1000–1600 scale bar: the school's middle 50% and Taeyul's score.
@@ -148,6 +139,22 @@ function schoolPhoto(s: ScenarioSchool) {
 }
 const typeLabel = (s: ScenarioSchool) =>
   /private/i.test(s.type) ? w("Private", "사립") : w("Public", "주립");
+// One card style for every school list: campus photo, QS tag, save button,
+// SAT bar and the program to examine.
+function photoCard(
+  s: ScenarioSchool,
+  sat: number | null,
+  saved: Set<string>,
+  mineTag: boolean,
+) {
+  const q = qsRanks[s.id];
+  const p = satPosition(s, sat);
+  return `<article class="browse-card ${mineTag ? "is-mine" : ""}"><div class="browse-photo">${schoolPhoto(s)}${q ? `<span class="photo-tag">QS ${q.tied ? "=" : ""}${q.rank}</span>` : ""}${mineTag ? `<span class="photo-tag mine">${w("My list", "내 후보")}</span>` : ""}<button class="photo-save ${saved.has(s.id) ? "saved" : ""}" data-save="${s.id}" aria-pressed="${saved.has(s.id)}" aria-label="${esc(w("Save school", "대학 저장"))} ${esc(name(s))}">${saved.has(s.id) ? "✓" : "+"}</button></div><div class="browse-body"><div><button class="link-button browse-name" data-detail="${s.id}">${esc(name(s))}</button><span class="small muted">${esc(s.city)}, ${esc(s.state)} · ${typeLabel(s)}</span></div>${
+    s.satRange
+      ? `<div>${satBar(s, sat)}<div class="bar-caption"><span>SAT ${s.satRange.low}–${s.satRange.high}</span>${sat !== null ? positionChipOnly(s, sat) : ""}</div></div>`
+      : `<div class="bar-caption"><span class="muted">${p === "not-considered" ? w("SAT not considered", "SAT 미반영") : w("No published SAT range", "공개 SAT 분포 없음")}</span></div>`
+  }<span class="small">${esc(translate(w(s.entry.program, s.entry.programKo)))} · ${esc(w(s.entry.unit, s.entry.unitKo))}</span></div></article>`;
+}
 function browse(
   ctx: ExplorerContext,
   saved: Set<string>,
@@ -186,15 +193,7 @@ function browse(
       "",
     )}<span class="chip-sep"></span>${chip('data-browse-flag="optionalOnly"', f.optionalOnly, w("Test optional", "시험 선택 제출"))}${chip('data-browse-flag="ucOnly"', f.ucOnly, w("UC · 9 campuses", "UC 9개 캠퍼스"))}${chip('data-browse-flag="privateOnly"', f.privateOnly, w("Private", "사립"))}</div></section>`;
   const cards = list
-    .map((s) => {
-      const q = qsRanks[s.id];
-      const p = satPosition(s, sat);
-      return `<article class="browse-card ${mineIds.has(s.id) ? "is-mine" : ""}"><div class="browse-photo">${schoolPhoto(s)}${q ? `<span class="photo-tag">QS ${q.tied ? "=" : ""}${q.rank}</span>` : ""}${mineIds.has(s.id) ? `<span class="photo-tag mine">${w("My list", "내 후보")}</span>` : ""}<button class="photo-save ${saved.has(s.id) ? "saved" : ""}" data-save="${s.id}" aria-pressed="${saved.has(s.id)}" aria-label="${esc(w("Save school", "대학 저장"))} ${esc(name(s))}">${saved.has(s.id) ? "✓" : "+"}</button></div><div class="browse-body"><div><button class="link-button browse-name" data-detail="${s.id}">${esc(name(s))}</button><span class="small muted">${esc(s.city)}, ${esc(s.state)} · ${typeLabel(s)}</span></div>${
-        s.satRange
-          ? `<div>${satBar(s, sat)}<div class="bar-caption"><span>SAT ${s.satRange.low}–${s.satRange.high}</span>${sat !== null ? positionChipOnly(s, sat) : ""}</div></div>`
-          : `<div class="bar-caption"><span class="muted">${p === "not-considered" ? w("SAT not considered", "SAT 미반영") : w("No published SAT range", "공개 SAT 분포 없음")}</span></div>`
-      }<span class="small">${esc(translate(w(s.entry.program, s.entry.programKo)))} · ${esc(w(s.entry.unit, s.entry.unitKo))}</span></div></article>`;
-    })
+    .map((s) => photoCard(s, sat, saved, mineIds.has(s.id)))
     .join("");
   return `${filters}<div class="browse-count"><strong>${w(`${list.length} of ${scenarioSchools.length}`, `${scenarioSchools.length}곳 중 ${list.length}곳`)}</strong>${f.search || f.band || f.optionalOnly || f.ucOnly || f.privateOnly ? `<button class="text-button" id="browse-clear">${w("Clear filters", "필터 지우기")}</button>` : ""}</div>${list.length ? `<div class="browse-grid">${cards}</div>` : `<p class="empty-state">${w("No schools match.", "맞는 대학이 없어요.")}</p>`}${sat !== null ? `<div class="bar-legend small muted"><span><i class="lg-range"></i>${w("School SAT middle 50%", "대학 SAT 중간 50%")}</span><span><i class="lg-me"></i>${w(`Taeyul ${sat}`, `태율이 ${sat}`)}</span><span>${w("Bar scale 1000–1600", "막대 범위 1000–1600")}</span></div>` : ""}<p class="small muted shortlist-note">${w("Research records, not admission predictions. Ontario marks are not converted to a U.S. GPA.", "합격 예측이 아닌 조사 기록이에요. 온타리오 내신을 미국 GPA로 바꾸지 않았어요.")}</p>`;
 }
@@ -222,22 +221,30 @@ function matching(input: ScenarioInput, saved: Set<string>) {
   const sat = input.sat!;
   const steps = satOutlook(plan.selected, sat);
   const nextList = SAT_SCENARIOS.find((n) => n > plan.referenceSat!);
-  const outlook = `<section class="panel sat-outlook" aria-labelledby="outlook-title"><h2 id="outlook-title">${w("If the SAT goes up", "SAT가 오르면")}</h2><div class="outlook-steps">${steps
+  const prevList = [...SAT_SCENARIOS]
+    .reverse()
+    .find((n) => n < plan.referenceSat!);
+  const back = prevList
+    ? `<div class="is-back"><span class="small muted">${prevList}</span><strong>${w(`Back to the ${prevList} list`, `${prevList} 목록으로 내려가기`)}</strong><button class="text-button" data-try-sat="${prevList}">${w("← Previous list", "← 이전 목록 보기")}</button></div>`
+    : "";
+  const above = plan.selected.filter(
+    (s) => satPosition(s, sat) === "above",
+  ).length;
+  // Nothing left to climb: every school with a range is already at or under
+  // this score, and this is the highest researched list.
+  const topped =
+    steps.length === 1 && !nextList
+      ? `<div class="is-next is-wide"><strong>${w("SAT is not the limit here", "SAT로는 더 바뀌지 않아요")}</strong><span class="small">${w(`${sat} is above every range in this list. A higher grade band changes it.`, `${sat}점은 이 목록 SAT 범위를 모두 넘어요. 내신 구간이 올라야 후보가 바뀌어요.`)}</span><button class="text-button" data-explorer-mode="all-scenarios">${w("See other combinations →", "다른 성적 조합 보기 →")}</button></div>`
+      : "";
+  const outlook = `<section class="panel sat-outlook" aria-label="${w("If the SAT goes up", "SAT가 오르면")}"><div class="outlook-steps">${back}${steps
     .map(
       (step, i) =>
-        `<div class="${i === 1 ? "is-next" : ""}"><span class="small muted">${i === 0 ? w(`Now ${step.sat}`, `지금 ${step.sat}`) : step.sat}</span><strong>${w(`${step.within} within range`, `범위 안 ${step.within}곳`)}</strong>${step.added.length ? `<span class="small">+ ${step.added.map((s) => esc(name(s))).join(", ")}</span>` : ""}${i === 1 ? `<button class="text-button" data-try-sat="${step.sat}">${w("View at this score →", "이 점수로 보기 →")}</button>` : ""}</div>`,
+        `<div class="${i === 1 ? "is-next" : ""}"><span class="small muted">${i === 0 ? w(`Now ${step.sat}`, `지금 ${step.sat}`) : step.sat}</span><strong>${w(`${step.within} within range`, `범위 안 ${step.within}곳`)}</strong>${i === 0 && above ? `<span class="small">${w(`Above the range at ${above}`, `범위보다 높음 ${above}곳`)}</span>` : ""}${step.added.length ? `<span class="small">+ ${step.added.map((s) => esc(name(s))).join(", ")}</span>` : ""}${i === 1 ? `<button class="text-button" data-try-sat="${step.sat}">${w("View at this score →", "이 점수로 보기 →")}</button>` : ""}</div>`,
     )
     .join(
       "",
-    )}${nextList ? `<div><span class="small muted">${nextList}</span><strong>${w(`Switches to the ${nextList} list`, `${nextList} 목록으로 바뀜`)}</strong><button class="text-button" data-try-sat="${nextList}">${w("See new candidates →", "새 후보 보기 →")}</button></div>` : ""}</div></section>`;
-  return `${outlook}<section class="scenario-result-head"><div><span class="eyebrow">${esc(input.band)} · ${w(`SAT ${plan.referenceSat} list`, `SAT ${plan.referenceSat} 기준 목록`)}</span><h2>${w("10 schools to investigate", "지원 검토 대학 10곳")}</h2></div><button class="text-button" data-explorer-mode="all-scenarios">${w("Other combinations →", "다른 성적 조합 보기 →")}</button></section><div class="table-wrap"><table class="shortlist-table"><thead><tr><th>${w("University", "대학")}</th><th>${w("Program to examine", "검토 전공")}</th><th>${w("SAT middle 50%", "SAT 중간 50%")}</th><th>${w(`Score ${sat}`, `내 점수 ${sat}`)}</th><th><span class="sr-only">${w("Save", "저장")}</span></th></tr></thead><tbody>${plan.selected
-    .map(
-      (s) =>
-        `<tr><th scope="row"><button class="link-button" data-detail="${s.id}">${esc(name(s))}</button><span class="small muted">${esc(s.state)}</span></th><td>${esc(translate(w(s.entry.program, s.entry.programKo)))}</td><td>${s.satRange ? `${s.satRange.low}–${s.satRange.high}` : "—"}</td><td>${positionChip(s, sat)}</td><td class="save-cell"><button class="save-button ${saved.has(s.id) ? "saved" : ""}" data-save="${s.id}" aria-label="${esc(w("Save school", "대학 저장"))} ${esc(name(s))}" aria-pressed="${saved.has(s.id)}">${saved.has(s.id) ? "✓" : "+"}</button></td></tr>`,
-    )
-    .join(
-      "",
-    )}</tbody></table></div><p class="small muted shortlist-note">${w("Research candidates, not an admission prediction. Confirm each university's official requirements before applying.", "합격 가능성 판정이 아닌 검토 후보입니다. 지원 전 각 대학 공식 요건을 확인하세요.")}</p><details class="methodology"><summary>${w("About this list", "이 목록에 대해")}</summary>${disclosure()}<p class="candidate-selection-note">${esc(gradeResearchNote(input.band, getLanguage() === "ko"))}</p></details>`;
+    )}${nextList ? `<div><span class="small muted">${nextList}</span><strong>${w(`Switches to the ${nextList} list`, `${nextList} 목록으로 바뀜`)}</strong><button class="text-button" data-try-sat="${nextList}">${w("See new candidates →", "새 후보 보기 →")}</button></div>` : ""}${topped}</div></section>`;
+  return `${outlook}<section class="scenario-result-head"><div><span class="eyebrow">${esc(input.band)} · ${w(`SAT ${plan.referenceSat} list`, `SAT ${plan.referenceSat} 기준 목록`)}</span><h2>${w("10 schools to investigate", "지원 검토 대학 10곳")}</h2></div><button class="text-button" data-explorer-mode="all-scenarios">${w("Other combinations →", "다른 성적 조합 보기 →")}</button></section><div class="browse-grid shortlist-grid">${plan.selected.map((s) => photoCard(s, sat, saved, false)).join("")}</div><p class="small muted shortlist-note">${w("Research candidates, not an admission prediction. Confirm each university's official requirements before applying.", "합격 가능성 판정이 아닌 검토 후보입니다. 지원 전 각 대학 공식 요건을 확인하세요.")}</p><details class="methodology"><summary>${w("About this list", "이 목록에 대해")}</summary>${disclosure()}<p class="candidate-selection-note">${esc(gradeResearchNote(input.band, getLanguage() === "ko"))}</p></details>`;
 }
 // Compact labels for dense grids: "캘리포니아 대학교 데이비스" → "UC 데이비스".
 function shortName(s: ScenarioSchool) {
@@ -359,9 +366,10 @@ function matrix(input: ScenarioInput, ctx: ExplorerContext) {
   const list = selected.selected
     .map((s) => {
       const q = qsRanks[s.id];
-      return `<div class="combo-row"><span><button class="link-button" data-detail="${s.id}">${esc(name(s))}</button> <small class="muted">${esc(s.state)}${q ? ` · QS ${q.tied ? "=" : ""}${q.rank}` : ""}</small></span>${
-        s.satRange ? satBar(s, mineSat) : `<span class="small muted">—</span>`
-      }${mineSat !== null ? positionChipOnly(s, mineSat) : `<span class="small muted">${s.satRange ? `${s.satRange.low}–${s.satRange.high}` : "—"}</span>`}</div>`;
+      const who = `<span><button class="link-button" data-detail="${s.id}">${esc(name(s))}</button> <small class="muted">${esc(s.state)}${q ? ` · QS ${q.tied ? "=" : ""}${q.rank}` : ""}</small></span>`;
+      if (!s.satRange)
+        return `<div class="combo-row">${who}<span class="small muted combo-norange">${s.testing.policy === "not-considered" ? w("SAT not considered", "SAT 미반영") : w("No published SAT range", "공개 SAT 분포 없음")}</span></div>`;
+      return `<div class="combo-row">${who}${satBar(s, mineSat)}${mineSat !== null ? positionChipOnly(s, mineSat) : `<span class="small muted">${s.satRange.low}–${s.satRange.high}</span>`}</div>`;
     })
     .join("");
   const backToMine =
