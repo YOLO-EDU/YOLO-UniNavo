@@ -877,6 +877,7 @@ main .ap-pick .button {
 .grades-head .segmented {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
+  width: 18rem;
   max-width: 100%;
 }
 .grades-head .segmented button {
