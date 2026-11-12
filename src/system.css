@@ -858,3 +858,15 @@ main .ap-pick .button {
     padding: 0 12px !important;
   }
 }
+
+/* Short pages: the workspace always fills the window, so the footer sits at
+   the bottom edge instead of leaving empty backdrop below it. */
+.workspace {
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+.workspace > main {
+  flex: 1 0 auto;
+}
