@@ -873,46 +873,52 @@ main .ap-pick .button {
   flex: 1 0 auto;
 }
 
-/* Let every grade contribute to sizing while only the selected one is visible. */
+html:has(.grades-head) {
+  scrollbar-gutter: stable;
+}
+main:has(> .grades-head) {
+  width: 100%;
+}
 .grades-head .segmented {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   width: 18rem;
   max-width: 100%;
 }
-.grades-head .segmented button {
+main .grades-head .segmented button {
   justify-content: center;
+  padding-inline: 4px !important;
+  white-space: nowrap;
 }
-.grade-variants {
+/* Keep the summary steady while the course list grows with the selected grade. */
+.grade-stat-variants {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
 }
-.grade-variants > div {
-  grid-area: 1 / 1;
-}
-.grade-variants > [inert] {
+.grade-stat-variants > [inert] {
   visibility: hidden;
 }
 .grade-stat-variants > div {
+  grid-area: 1 / 1;
   display: grid;
   align-content: start;
   gap: 4px;
 }
-.grade-variants .mark-name {
+.marks-grid .mark-name {
   overflow-wrap: anywhere;
 }
 @media (max-width: 600px) {
-  .grade-variants .mark-row {
+  .marks-grid .mark-row {
     grid-template-columns: minmax(0, 1fr) 40px 42px 36px;
     gap: 4px 8px;
   }
-  .grade-variants .mark-row .scale {
+  .marks-grid .mark-row .scale {
     display: none;
   }
-  .grade-variants .mark-bar {
+  .marks-grid .mark-bar {
     grid-area: 2 / 1 / 3 / -1;
   }
-  .grade-variants .grade-tag {
+  .marks-grid .grade-tag {
     white-space: normal;
   }
 }

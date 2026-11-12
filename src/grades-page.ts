@@ -134,8 +134,8 @@ const gradeLevels = [9, 10, 11, 12];
 
 // The hidden variants take up space in the same grid cell. The tallest grade
 // sets the size without exposing inactive content to focus or screen readers.
-function gradeVariants(contents: string[], selected: number, className = "") {
-  return `<div class="grade-variants ${className}">${contents
+function gradeStatVariants(contents: string[], selected: number) {
+  return `<div class="grade-stat-variants">${contents
     .map(
       (content, i) =>
         `<div${gradeLevels[i] === selected ? "" : " inert"}>${content}</div>`,
@@ -164,6 +164,7 @@ export function renderGradesPage(state: GradesState, ui: GradesUi) {
   );
   const totalGpa = usGpa(state.courses);
   const stats = byGrade.map((courses) => gradeStats(courses, totalGpa));
+  const selectedCourses = byGrade[gradeLevels.indexOf(ui.grade)] ?? [];
   const best = bestSat(state.sat);
   const nextAp = state.ap[0];
   const summary = `<section class="grades-summary" aria-label="${w("Summary", "요약")}">${[
@@ -171,10 +172,9 @@ export function renderGradesPage(state: GradesState, ui: GradesUi) {
   ]
     .map(
       (i) =>
-        `<div${i === 0 ? ' class="is-dark"' : ""}>${gradeVariants(
+        `<div${i === 0 ? ' class="is-dark"' : ""}>${gradeStatVariants(
           stats.map((cards) => cards[i]),
           ui.grade,
-          "grade-stat-variants",
         )}</div>`,
     )
     .join(
@@ -183,10 +183,7 @@ export function renderGradesPage(state: GradesState, ui: GradesUi) {
   return `<div class="grades-head"><h1 class="home-title">${w("Grades", "성적")}</h1><div class="segmented" role="group" aria-label="${w("Grade", "학년")}">${gradeLevels.map((g) => `<button data-grade-view="${g}" aria-pressed="${g === ui.grade}">${w(`Gr ${g}`, `${g}학년`)}</button>`).join("")}</div></div>
   ${ui.notice ? `<div class="planner-notice" role="status">${esc(ui.notice)} ${ui.canUndo ? `<button id="undo-grades" class="text-button">${w("Undo", "실행 취소")}</button>` : ""}</div>` : ""}
   ${summary}
-  <section class="grades-card" aria-labelledby="school-marks-title"><div class="grades-card-head"><h2 id="school-marks-title">${w(`Ontario marks · Grade ${ui.grade}`, `온타리오 내신 · ${ui.grade}학년`)}</h2><button class="button" id="add-course">＋ ${w("Add course", "과목 추가")}</button></div>${gradeVariants(
-    byGrade.map((courses) => marksList(state, courses)),
-    ui.grade,
-  )}</section>
+  <section class="grades-card" aria-labelledby="school-marks-title"><div class="grades-card-head"><h2 id="school-marks-title">${w(`Ontario marks · Grade ${ui.grade}`, `온타리오 내신 · ${ui.grade}학년`)}</h2><button class="button" id="add-course">＋ ${w("Add course", "과목 추가")}</button></div>${marksList(state, selectedCourses)}</section>
   <div class="grades-two">${satCard(state)}${apCard(state)}</div>`;
 }
 
@@ -280,9 +277,7 @@ export function bindGradesPage(ctx: GradesContext) {
     .querySelector("#add-course")
     ?.addEventListener("click", () => openCourseEditor(ctx));
   document
-    .querySelectorAll<HTMLButtonElement>(
-      ".grade-variants > :not([inert]) [data-edit-course]",
-    )
+    .querySelectorAll<HTMLButtonElement>("[data-edit-course]")
     .forEach((b) =>
       b.addEventListener("click", () =>
         openCourseEditor(ctx, b.dataset.editCourse),
